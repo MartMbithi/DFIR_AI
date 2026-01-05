@@ -1,21 +1,21 @@
 """
-DFIR-AI :: Master Execution Pipeline
------------------------------------
-Runs:
-1. Load test data
-2. Persist forensic artifacts
-3. Rule-based triage
-4. Hybrid semantic triage
-5. Persist triage results
-6. Generate forensic narrative (OpenAI)
+DFIR-AI :: Command-Line Forensic Pipeline
+========================================
 
-Designed for:
-- End-to-end validation
-- Demo / viva walkthrough
-- Auditability
+Features:
+✔ ASCII progress bars
+✔ Execution timing
+✔ CLI flags
+✔ Persistent triage results
+✔ Optional LLM narrative generation
+
+Run:
+  python -m scripts.run_all [--dry-run] [--no-llm]
 """
 
 import json
+import time
+import argparse
 import mysql.connector
 from datetime import datetime
 from triage.triage_engine import TriageArtifact
@@ -34,94 +34,92 @@ DB_CONFIG = {
     "database": "dfir_ai"
 }
 
+DATA_PATH = "data/test_artifacts.json"
+
 INVESTIGATION_GOAL = (
     "Identify malicious execution, persistence mechanisms, "
     "and suspicious file downloads"
 )
 
-DATA_PATH = "data/test_artifacts.json"
-
-# ---------------- VISUAL HELPERS ----------------
-
-def ok(msg):
-    print(f"   ✔ {msg}")
-
-def fail(msg):
-    print(f"   ✖ {msg}")
-
-def step(msg):
-    print(f"\n▶ {msg}")
+# ---------------- UI HELPERS ----------------
 
 def banner():
-    print("\n" + "=" * 60)
-    print("  DFIR-AI :: AUTONOMOUS FORENSIC PIPELINE")
-    print("  Status: ONLINE")
-    print("  Mode  : FULL EXECUTION")
-    print("=" * 60 + "\n")
+    print("\n" + "=" * 70)
+    print("  DFIR-AI :: AUTONOMOUS DIGITAL FORENSIC PIPELINE")
+    print("  Status : ONLINE")
+    print("  Engine : Hybrid AI (Deterministic + Semantic)")
+    print("=" * 70 + "\n")
 
-# ---------------- CORE FUNCTIONS ----------------
+def progress(step, total, label):
+    bar_len = 30
+    filled = int(bar_len * step / total)
+    bar = "█" * filled + "-" * (bar_len - filled)
+    print(f"\r[{bar}] {label}", end="", flush=True)
 
-def load_test_data():
-    step("Loading forensic test artifacts")
-    try:
-        with open(DATA_PATH, "r") as f:
-            artifacts = json.load(f)
-        ok(f"Loaded {len(artifacts)} artifacts")
-        return artifacts
-    except Exception as e:
-        fail(f"Failed to load test data: {e}")
-        raise
+def ok(msg):
+    print(f"\n   ✔ {msg}")
 
-def insert_artifacts(artifacts):
-    step("Persisting forensic artifacts to database")
-    try:
-        conn = mysql.connector.connect(**DB_CONFIG)
-        cur = conn.cursor()
+def fail(msg):
+    print(f"\n   ✖ {msg}")
 
-        for a in artifacts:
-            cur.execute(
-                """
-                INSERT IGNORE INTO forensic_artifacts (
-                    artifact_id, case_id, artifact_type, source_tool,
-                    source_file, host_id, user_context,
-                    artifact_timestamp, artifact_path,
-                    content_summary, raw_content,
-                    md5, sha1, sha256, metadata, ingested_at
-                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                """,
-                (
-                    a["artifact_id"], a["case_id"], a["artifact_type"],
-                    a["source_tool"], a["source_file"], a["host_id"],
-                    a["user_context"], a["artifact_timestamp"],
-                    a["artifact_path"], a["content_summary"],
-                    a["raw_content"], a["md5"], a["sha1"],
-                    a["sha256"], a["metadata"], a["ingested_at"]
-                )
+def timing(label, start):
+    elapsed = time.time() - start
+    print(f"   ⏱ {label} completed in {elapsed:.2f}s")
+
+# ---------------- CORE PIPELINE ----------------
+
+def load_artifacts():
+    with open(DATA_PATH, "r") as f:
+        return json.load(f)
+
+def persist_artifacts(artifacts, dry_run):
+    if dry_run:
+        return
+
+    conn = mysql.connector.connect(**DB_CONFIG)
+    cur = conn.cursor()
+
+    for a in artifacts:
+        cur.execute(
+            """
+            INSERT IGNORE INTO forensic_artifacts (
+                artifact_id, case_id, artifact_type, source_tool,
+                source_file, host_id, user_context,
+                artifact_timestamp, artifact_path,
+                content_summary, raw_content,
+                md5, sha1, sha256, metadata, ingested_at
+            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """,
+            (
+                a["artifact_id"], a["case_id"], a["artifact_type"],
+                a["source_tool"], a["source_file"], a["host_id"],
+                a["user_context"], a["artifact_timestamp"],
+                a["artifact_path"], a["content_summary"],
+                a["raw_content"], a["md5"], a["sha1"],
+                a["sha256"], a["metadata"], a["ingested_at"]
             )
+        )
 
-        conn.commit()
-        cur.close()
-        conn.close()
-        ok("Artifacts persisted successfully")
-    except Exception as e:
-        fail(f"Artifact persistence failed: {e}")
-        raise
+    conn.commit()
+    cur.close()
+    conn.close()
 
-def run_triage(artifacts):
-    step("Executing rule-based and hybrid triage")
-    try:
-        store = TriageStore(**DB_CONFIG)
-        triaged_for_narrative = []
+def run_triage(artifacts, dry_run):
+    store = None if dry_run else TriageStore(**DB_CONFIG)
+    triaged = []
 
-        for a in artifacts:
-            rule = TriageArtifact(a)
+    total = len(artifacts)
+    for i, a in enumerate(artifacts, start=1):
+        progress(i, total, "Triage processing")
 
-            hybrid = HybridScore(
-                rule_score=rule["triage_score"],
-                artifact_text=a["content_summary"],
-                investigation_goal=INVESTIGATION_GOAL
-            )
+        rule = TriageArtifact(a)
+        hybrid = HybridScore(
+            rule_score=rule["triage_score"],
+            artifact_text=a["content_summary"],
+            investigation_goal=INVESTIGATION_GOAL
+        )
 
+        if store:
             store.InsertTriageResult({
                 "artifact_id": a["artifact_id"],
                 "triage_score": hybrid["final_score"],
@@ -129,48 +127,78 @@ def run_triage(artifacts):
                 "triaged_at": datetime.utcnow()
             })
 
-            triaged_for_narrative.append({
-                "artifact_id": a["artifact_id"],
-                "artifact_type": a["artifact_type"],
-                "content_summary": a["content_summary"],
-                **hybrid
-            })
+        triaged.append({
+            "artifact_id": a["artifact_id"],
+            "artifact_type": a["artifact_type"],
+            "content_summary": a["content_summary"],
+            **hybrid
+        })
 
-        ok("Triage executed and results persisted")
-        return triaged_for_narrative
-    except Exception as e:
-        fail(f"Triage execution failed: {e}")
-        raise
+    return triaged
 
-def generate_narrative(triaged_artifacts):
-    step("Generating forensic narrative via LLM")
-    try:
-        prompt = BuildIncidentSummaryPrompt(triaged_artifacts)
-        llm = OpenAILLMClient()
-        generator = NarrativeGenerator(llm)
-        narrative = generator.Generate(prompt)
+def generate_narrative(triaged, no_llm):
+    if no_llm:
+        return "[LLM DISABLED] Narrative generation skipped."
 
-        ok("Narrative generation completed")
-        return narrative
-    except Exception as e:
-        fail(f"Narrative generation failed: {e}")
-        raise
+    prompt = BuildIncidentSummaryPrompt(triaged)
+    llm = OpenAILLMClient()
+    generator = NarrativeGenerator(llm)
+    return generator.Generate(prompt)
 
-# ---------------- MAIN ----------------
+# ---------------- MAIN CLI ----------------
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="DFIR-AI Autonomous Forensic Pipeline"
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Run pipeline without database writes"
+    )
+    parser.add_argument(
+        "--no-llm",
+        action="store_true",
+        help="Disable LLM narrative generation"
+    )
+
+    args = parser.parse_args()
+
     banner()
 
-    artifacts = load_test_data()
-    insert_artifacts(artifacts)
-    triaged = run_triage(artifacts)
-    narrative = generate_narrative(triaged)
+    total_start = time.time()
 
-    print("\n" + "-" * 60)
-    print("  FORENSIC NARRATIVE OUTPUT")
-    print("-" * 60)
+    # Step 1: Load
+    t = time.time()
+    artifacts = load_artifacts()
+    ok(f"Loaded {len(artifacts)} forensic artifacts")
+    timing("Artifact loading", t)
+
+    # Step 2: Persist artifacts
+    t = time.time()
+    persist_artifacts(artifacts, args.dry_run)
+    ok("Artifacts persisted" if not args.dry_run else "Dry-run: artifact persistence skipped")
+    timing("Artifact persistence", t)
+
+    # Step 3: Triage
+    t = time.time()
+    triaged = run_triage(artifacts, args.dry_run)
+    ok("Triage completed and persisted" if not args.dry_run else "Dry-run: triage persistence skipped")
+    timing("Triage execution", t)
+
+    # Step 4: Narrative
+    t = time.time()
+    narrative = generate_narrative(triaged, args.no_llm)
+    ok("Narrative generated" if not args.no_llm else "LLM disabled")
+    timing("Narrative generation", t)
+
+    print("\n" + "-" * 70)
+    print("FORENSIC NARRATIVE OUTPUT")
+    print("-" * 70)
     print(narrative)
-    print("\n✔ PIPELINE EXECUTION COMPLETE\n")
+
+    timing("TOTAL PIPELINE", total_start)
+    print("\n✔ DFIR-AI PIPELINE EXECUTION COMPLETE\n")
 
 if __name__ == "__main__":
     main()
