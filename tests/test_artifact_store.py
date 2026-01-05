@@ -1,5 +1,6 @@
 from storage.artifact_store import ArtifactStore
 from datetime import datetime
+import uuid
 
 def test_insert_artifact():
     store = ArtifactStore(
@@ -10,7 +11,7 @@ def test_insert_artifact():
     )
 
     artifact = {
-        "artifact_id": "test-artifact-001",
+        "artifact_id": str(uuid.uuid4()),
         "case_id": "TEST-CASE",
         "artifact_type": "file",
         "source_tool": "test",
