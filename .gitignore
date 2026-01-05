@@ -65,3 +65,7 @@ data/normalized/*
 # Jupyter (Optional)
 # =========================
 .ipynb_checkpoints/
+
+# Environment variables
+.env
+.env.*

@@ -24,3 +24,7 @@ sentence-transformers==2.6.1
 # Numpy
 # =========================
 numpy==1.26.4
+# =========================
+# Python dot-env
+# =========================
+python-dotenv==1.0.1
