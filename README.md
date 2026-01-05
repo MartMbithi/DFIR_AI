@@ -41,7 +41,7 @@ SOURCE storage/schema.sql;
 ```
 python -m venv venv
 source venv/bin/activate
-pip install mysql-connector-python
+pip install -r requirements.txt
 ```
 
 ## Running the Ingestion Pipeline
