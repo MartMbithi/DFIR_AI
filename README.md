@@ -49,13 +49,3 @@ pip install -r requirements.txt
 python ingestion/ingest.py
 ```
 
-## Verification
-```
-SELECT COUNT(*) FROM forensic_artifacts;
-```
-
-## Academic Relevance
-This module supports the methodology, implementation, and evaluation chapters of the MSc thesis.
-
-## Next Phase
-Module 2 will introduce AI feature engineering and evidence correlation.
