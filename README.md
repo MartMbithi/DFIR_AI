@@ -1,51 +1,63 @@
 # DFIR-AI: AI-Assisted Digital Forensics Automation
 
 ## Overview
-This repository contains the ingestion and schema layer for an AI-assisted digital forensics platform. It automates parsing, normalization, and storage of forensic artifacts from standard DFIR tools into a MySQL database, enabling downstream AI-driven analysis.
+DFIR-AI is an end-to-end, research-grade digital forensics platform that automates evidence ingestion, normalization, triage, semantic prioritization, and forensic narrative generation.  
+The system is designed with forensic defensibility, explainability, and reproducibility as first-class principles.
+
+## Key Capabilities
+- Automated ingestion of forensic artifacts
+- Unified relational evidence schema (MySQL)
+- Rule-based and semantic hybrid triage
+- Persistent triage audit trail
+- LLM-assisted forensic narrative generation (OpenAI)
+- CLI-driven execution with progress bars and timing
 
 ## Technology Stack
 - Python 3.9+
 - MySQL (XAMPP / LAMPP)
 - Autopsy CSV exports
 - Bulk Extractor feature files
+- Sentence Transformers
+- OpenAI Responses API
 
 ## Directory Structure
-```
 dfir-ai/
 ├── ingestion/
-│   ├── parsers/
-│   │   ├── autopsy_parser.py
-│   │   ├── bulk_extractor_parser.py
-│   ├── normalizer.py
-│   ├── ingest.py
 ├── storage/
-│   ├── artifact_store.py
-│   └── schema.sql
+├── triage/
+├── triage_semantic/
+├── narrative/
+├── narrative_llm/
+├── scripts/
 ├── data/
-│   ├── raw/
-│   ├── normalized/
-├── utils/
-│   └── uuid_utils.py
-```
+├── tests/
+├── .env
+├── requirements.txt
+└── README.md
 
-## Setup Instructions
+## Setup
 
-### MySQL
-Start MySQL via XAMPP/LAMPP, then run:
-```
-mysql -u root -p
-SOURCE storage/schema.sql;
-```
+### Database
+mysql -u root -p dfir_ai < storage/schema.sql
 
-### Python Environment
-```
+### Python
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-```
 
-## Running the Ingestion Pipeline
-```
-python ingestion/ingest.py
-```
+### Environment
+Create .env file:
+OPENAI_API_KEY=your_key_here
 
+## Run Pipeline
+python -m scripts.run_all
+
+Optional flags:
+--dry-run
+--no-llm
+
+## Testing
+pytest
+
+## Academic Note
+LLMs are used strictly for narrative assistance and do not influence evidence prioritization.
