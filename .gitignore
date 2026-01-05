@@ -1,0 +1,67 @@
+# =========================
+# Python Virtual Environments
+# =========================
+venv/
+.venv/
+env/
+ENV/
+
+# =========================
+# Python Cache & Artifacts
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# =========================
+# IDE / Editor Files
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# OS Generated Files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Logs & Runtime Files
+# =========================
+*.log
+
+# =========================
+# Local Databases & Secrets
+# =========================
+*.db
+*.sqlite
+*.sqlite3
+.env
+
+# =========================
+# Build & Packaging
+# =========================
+build/
+dist/
+*.egg-info/
+
+# =========================
+# Forensic Data (DO NOT COMMIT)
+# =========================
+data/raw/*
+data/normalized/*
+!data/raw/.gitkeep
+!data/normalized/.gitkeep
+
+# =========================
+# MySQL Dumps / Backups
+# =========================
+*.sql.bak
+*.dump
+
+# =========================
+# Jupyter (Optional)
+# =========================
+.ipynb_checkpoints/
