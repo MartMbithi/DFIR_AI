@@ -4,12 +4,36 @@ import os
 from datetime import datetime, timezone
 from collections import defaultdict, Counter
 
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    Table,
+    TableStyle,
+    PageBreak
+)
 from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.enums import TA_JUSTIFY
 from reportlab.lib.units import cm
 from reportlab.lib import colors
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 OUTPUT_DIR = "reports"
+FONT_DIR = "reporting/fonts"
+FONT_NAME = "Jost"
+
+# -------------------------
+# Font handling
+# -------------------------
+
+def _register_font():
+    font_path = os.path.join(FONT_DIR, "Jost.ttf")
+    if os.path.exists(font_path):
+        pdfmetrics.registerFont(TTFont(FONT_NAME, font_path))
+        return FONT_NAME
+    return "Courier"  # Safe monospace fallback
 
 # -------------------------
 # Helpers
@@ -24,36 +48,8 @@ def _ts():
 def _base(case_id):
     return f"{OUTPUT_DIR}/{case_id}_{_ts()}"
 
-def _new_page(c):
-    c.showPage()
-    return A4[1] - 2 * cm
-
-def _section(c, title, y):
-    if y < 3 * cm:
-        y = _new_page(c)
-    c.setFont("Helvetica-Bold", 13)
-    c.drawString(2 * cm, y, title)
-    y -= 0.2 * cm
-    c.setStrokeColor(colors.grey)
-    c.line(2 * cm, y, 19 * cm, y)
-    y -= 0.6 * cm
-    return y
-
-def _paragraph(c, text, y, size=10):
-    c.setFont("Helvetica", size)
-    for line in text.split("\n"):
-        if y < 2.5 * cm:
-            y = _new_page(c)
-            c.setFont("Helvetica", size)
-        c.drawString(2 * cm, y, line[:110])
-        y -= 0.45 * cm
-    return y
-
-def _bullet(c, text, y):
-    return _paragraph(c, f"- {text}", y)
-
 # -------------------------
-# TXT REPORT (unchanged, but safer)
+# TXT REPORT (unchanged)
 # -------------------------
 
 def WriteTXTReport(case_id, narrative, intensity, triaged=None):
@@ -70,140 +66,202 @@ def WriteTXTReport(case_id, narrative, intensity, triaged=None):
     return path
 
 # -------------------------
-# PDF REPORT (FULL REFACTOR)
+# PDF REPORT (JUSTIFIED, DOUBLE-SPACED)
 # -------------------------
 
 def WritePDFReport(case_id, narrative, triaged):
     _ensure_output_dir()
+    font = _register_font()
+
     path = f"{_base(case_id)}_full.pdf"
 
-    c = canvas.Canvas(path, pagesize=A4)
-    width, height = A4
+    doc = SimpleDocTemplate(
+        path,
+        pagesize=A4,
+        rightMargin=2.2 * cm,
+        leftMargin=2.2 * cm,
+        topMargin=2.5 * cm,
+        bottomMargin=2.5 * cm
+    )
+
+    styles = {
+        "title": ParagraphStyle(
+            name="Title",
+            fontName=font,
+            fontSize=18,
+            spaceAfter=20
+        ),
+        "header": ParagraphStyle(
+            name="Header",
+            fontName=font,
+            fontSize=13,
+            spaceBefore=18,
+            spaceAfter=12
+        ),
+        "body": ParagraphStyle(
+            name="Body",
+            fontName=font,
+            fontSize=10.5,
+            leading=21,  # double spacing
+            alignment=TA_JUSTIFY,
+            spaceAfter=12
+        ),
+        "mono": ParagraphStyle(
+            name="Mono",
+            fontName=font,
+            fontSize=9.5,
+            leading=19,
+            alignment=TA_JUSTIFY,
+            spaceAfter=8
+        )
+    }
+
+    story = []
 
     # -------------------------
-    # COVER PAGE
+    # COVER
     # -------------------------
 
-    c.setFont("Helvetica-Bold", 20)
-    c.drawString(2 * cm, height - 3 * cm, "Digital Forensic Incident Report")
-
-    c.setFont("Helvetica", 12)
-    c.drawString(2 * cm, height - 4.2 * cm, f"Case ID: {case_id}")
-    c.drawString(2 * cm, height - 5.0 * cm, "Engine: DFIR-AI Hybrid (Deterministic + Semantic)")
-    c.drawString(2 * cm, height - 5.8 * cm, f"Generated: {datetime.now(timezone.utc)} UTC")
-
-    c.setFont("Helvetica-Oblique", 10)
-    c.drawString(2 * cm, height - 7.5 * cm, "CONFIDENTIAL – FOR AUTHORIZED USE ONLY")
-
-    c.showPage()
-
-    y = height - 2 * cm
+    story.append(Paragraph("Digital Forensic Incident Report", styles["title"]))
+    story.append(Paragraph(f"<b>Case ID:</b> {case_id}", styles["body"]))
+    story.append(Paragraph(
+        f"<b>Generated:</b> {datetime.now(timezone.utc)} UTC<br/>"
+        f"<b>Engine:</b> DFIR-AI Hybrid (Deterministic + Semantic)",
+        styles["body"]
+    ))
+    story.append(Spacer(1, 40))
+    story.append(Paragraph(
+        "<i>CONFIDENTIAL – Authorized Personnel Only</i>",
+        styles["mono"]
+    ))
+    story.append(PageBreak())
 
     # -------------------------
     # EXECUTIVE SUMMARY
     # -------------------------
 
-    y = _section(c, "1. Executive Summary", y)
-    y = _paragraph(c, narrative, y)
+    story.append(Paragraph("1. Executive Summary", styles["header"]))
+    story.append(Paragraph(narrative, styles["body"]))
 
     # -------------------------
-    # METRICS OVERVIEW
+    # METRICS
     # -------------------------
 
-    y = _section(c, "2. Incident Metrics Overview", y)
+    story.append(Paragraph("2. Incident Metrics Overview", styles["header"]))
 
-    event_types = Counter(a.get("artifact_type") for a in triaged)
-    attack_labels = Counter()
-
+    attack_counts = Counter()
     for a in triaged:
-        summary = a.get("content_summary", "")
-        for key in ["SQL_INJECTION", "LFI", "WAF_CORRELATION", "PROTOCOL_ABUSE", "ACCESS_DENIED"]:
-            if key in summary:
-                attack_labels[key] += 1
+        for k in ["SQL_INJECTION", "LFI", "WAF_CORRELATION", "PROTOCOL_ABUSE", "ACCESS_DENIED"]:
+            if k in a.get("content_summary", ""):
+                attack_counts[k] += 1
 
-    y = _bullet(c, f"Total forensic artifacts analyzed: {len(triaged)}", y)
-    y = _bullet(c, f"Unique artifact types: {len(event_types)}", y)
+    metrics_text = [
+        f"Total forensic artifacts analyzed: {len(triaged)}.",
+        f"Unique source IP addresses observed: {len(set(_extract_ips(triaged)))}."
+    ]
 
-    for k, v in attack_labels.items():
-        y = _bullet(c, f"{k.replace('_', ' ').title()} events observed: {v}", y)
+    for k, v in attack_counts.items():
+        metrics_text.append(f"{k.replace('_',' ').title()} events observed: {v}.")
 
-    # -------------------------
-    # ATTACK VECTOR ANALYSIS
-    # -------------------------
-
-    y = _section(c, "3. Attack Vector Analysis", y)
-
-    for attack, count in attack_labels.items():
-        y = _bullet(
-            c,
-            f"{attack.replace('_', ' ').title()} — {count} correlated events indicating automated probing or exploitation attempts.",
-            y
-        )
+    story.append(Paragraph(" ".join(metrics_text), styles["body"]))
 
     # -------------------------
-    # SOURCE IP BEHAVIOR
+    # SOURCE IP ANALYSIS
     # -------------------------
 
-    y = _section(c, "4. Source IP Behavioral Analysis", y)
+    story.append(Paragraph("3. Source IP Behavioral Analysis", styles["header"]))
 
-    ip_groups = defaultdict(list)
+    ip_groups = _group_by_ip(triaged)
+
+    for ip, artifacts in ip_groups.items():
+        story.append(Paragraph(f"<b>Source IP:</b> {ip}", styles["body"]))
+
+        summaries = Counter(a.get("content_summary") for a in artifacts)
+        lines = [
+            f"{summary} ({count} occurrences)."
+            for summary, count in summaries.items()
+        ]
+        story.append(Paragraph(" ".join(lines), styles["body"]))
+
+    # -------------------------
+    # TIMELINE TABLE
+    # -------------------------
+
+    story.append(PageBreak())
+    story.append(Paragraph("4. Chronological Event Timeline", styles["header"]))
+
+    timeline_rows = [["Timestamp (UTC)", "Event Description"]]
+
+    for a in sorted(triaged, key=lambda x: x.get("artifact_timestamp")):
+        timeline_rows.append([
+            str(a.get("artifact_timestamp")),
+            a.get("content_summary")
+        ])
+
+    table = Table(
+        timeline_rows,
+        colWidths=[5 * cm, 10.5 * cm],
+        repeatRows=1
+    )
+
+    table.setStyle(TableStyle([
+        ("FONT", (0, 0), (-1, -1), font),
+        ("FONTSIZE", (0, 0), (-1, -1), 9),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+        ("GRID", (0, 0), (-1, -1), 0.25, colors.grey),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+        ("TOPPADDING", (0, 0), (-1, -1), 8),
+    ]))
+
+    story.append(table)
+
+    # -------------------------
+    # HASH ANALYSIS
+    # -------------------------
+
+    story.append(PageBreak())
+    story.append(Paragraph("5. Hash & Payload Analysis", styles["header"]))
+
+    story.append(Paragraph(
+        "No cryptographic file hashes (MD5, SHA1, SHA256) were observed during analysis. "
+        "All artifacts represent network-layer or application-layer security events. "
+        "No payload delivery, file execution, or persistence mechanisms were confirmed.",
+        styles["body"]
+    ))
+
+    # -------------------------
+    # LIMITATIONS
+    # -------------------------
+
+    story.append(Paragraph("6. Confidence & Limitations", styles["header"]))
+    story.append(Paragraph(
+        "This assessment is based exclusively on provided web and access log data. "
+        "No endpoint telemetry, memory artifacts, or file system evidence was available. "
+        "Severity scoring was derived using deterministic rules combined with semantic similarity analysis.",
+        styles["body"]
+    ))
+
+    doc.build(story)
+    return path
+
+# -------------------------
+# Internal helpers
+# -------------------------
+
+def _extract_ips(triaged):
+    ips = set()
+    for a in triaged:
+        for i in a.get("metadata", {}).get("interpretation", []):
+            if "IP " in i:
+                ips.add(i.split("IP ")[1].split()[0])
+    return ips
+
+def _group_by_ip(triaged):
+    groups = defaultdict(list)
     for a in triaged:
         for i in a.get("metadata", {}).get("interpretation", []):
             if "IP " in i:
                 ip = i.split("IP ")[1].split()[0]
-                ip_groups[ip].append(a)
-
-    for ip, artifacts in ip_groups.items():
-        if y < 4 * cm:
-            y = _new_page(c)
-
-        c.setFont("Helvetica-Bold", 11)
-        c.drawString(2 * cm, y, f"Source IP: {ip}")
-        y -= 0.5 * cm
-
-        summaries = Counter(a.get("content_summary") for a in artifacts)
-        y = _bullet(c, f"Total events: {len(artifacts)}", y)
-
-        for s, cnt in summaries.items():
-            y = _bullet(c, f"{s} ({cnt} occurrences)", y)
-
-        y -= 0.3 * cm
-
-    # -------------------------
-    # TIMELINE
-    # -------------------------
-
-    y = _section(c, "5. Chronological Event Timeline", y)
-
-    for a in sorted(triaged, key=lambda x: x.get("artifact_timestamp")):
-        line = f"{a.get('artifact_timestamp')} — {a.get('content_summary')}"
-        y = _paragraph(c, line, y, size=9)
-
-    # -------------------------
-    # HASH & PAYLOAD ANALYSIS
-    # -------------------------
-
-    y = _section(c, "6. Hash & Payload Analysis", y)
-
-    hashes_present = any(a.get("md5") or a.get("sha1") or a.get("sha256") for a in triaged)
-
-    if not hashes_present:
-        y = _paragraph(
-            c,
-            "No file hashes (MD5, SHA1, SHA256) were observed. "
-            "All artifacts represent network-layer or application-layer events. "
-            "No payload delivery or file execution was confirmed.",
-            y
-        )
-
-    # -------------------------
-    # CONFIDENCE & LIMITATIONS
-    # -------------------------
-
-    y = _section(c, "7. Confidence & Limitations", y)
-    y = _bullet(c, "Scoring derived from deterministic rules combined with semantic similarity.", y)
-    y = _bullet(c, "Analysis limited to provided server access logs.", y)
-    y = _bullet(c, "No endpoint telemetry, memory, or file system artifacts were available.", y)
-
-    c.save()
-    return path
+                groups[ip].append(a)
+    return groups
