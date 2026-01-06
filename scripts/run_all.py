@@ -144,6 +144,32 @@ def run_triage(artifacts, dry_run):
 
     return triaged
 
+def build_narrative_prompt(triaged, max_artifacts=30):
+    """
+    Build a bounded, defensible narrative prompt.
+    """
+    summaries = []
+    for a in triaged[:max_artifacts]:
+        summaries.append(
+            f"- {a.get('artifact_timestamp','N/A')}: {a.get('content_summary','')}"
+        )
+
+    return f"""
+    You are a digital forensics analyst.
+
+    Write a professional forensic incident narrative based on the following summarized evidence.
+
+    Key Observations:
+    - Total artifacts analyzed: {len(triaged)}
+    - Sampled artifacts (first {len(summaries)} events):
+
+    {chr(10).join(summaries)}
+
+    Do not speculate.
+    Do not assign attribution.
+    Do not claim compromise unless explicitly stated.
+    """
+
 
 def generate_narrative(triaged, no_llm):
     if no_llm or not triaged:
