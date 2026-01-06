@@ -21,20 +21,21 @@ The system is designed with forensic defensibility, explainability, and reproduc
 - OpenAI Responses API
 
 ## Directory Structure
+```
 dfir-ai/
-├── ingestion/
-├── storage/
-├── triage/
-├── triage_semantic/
-├── narrative/
-├── narrative_llm/
-├── scripts/
-├── data/
-├── tests/
-├── .env
-├── requirements.txt
-└── README.md
-
+    ├── ingestion/
+    ├── storage/
+    ├── triage/
+    ├── triage_semantic/
+    ├── narrative/
+    ├── narrative_llm/
+    ├── scripts/
+    ├── data/
+    ├── tests/
+    ├── .env
+    ├── requirements.txt
+    └── README.md
+```
 ## Setup
 
 ### Database
