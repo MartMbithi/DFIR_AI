@@ -1,3 +1,5 @@
+# reporting/report_writer.py
+
 import os
 from datetime import datetime, timezone
 from reportlab.lib.pagesizes import A4
@@ -5,7 +7,9 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.units import cm
 
 OUTPUT_DIR = "reports"
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+def _ensure_output_dir():
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def _ts():
     return datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
@@ -14,16 +18,22 @@ def _base(case_id):
     return f"{OUTPUT_DIR}/{case_id}_{_ts()}"
 
 def WriteTXTReport(case_id, narrative, intensity, hash_summary=None):
+    _ensure_output_dir()
+
     path = f"{_base(case_id)}_{intensity}.txt"
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         f.write(narrative)
+
         if hash_summary:
             f.write("\n\nHASH SUMMARY\n")
             for h in hash_summary:
                 f.write(f"{h}\n")
+
     return path
 
 def WritePDFReport(case_id, narrative, triaged_artifacts):
+    _ensure_output_dir()
+
     path = f"{_base(case_id)}_full.pdf"
     c = canvas.Canvas(path, pagesize=A4)
     width, height = A4
@@ -60,7 +70,7 @@ def WritePDFReport(case_id, narrative, triaged_artifacts):
         c.drawString(2*cm, y, line[:110])
         y -= 0.4*cm
 
-    # Hash summary table
+    # Hash Summary
     c.showPage()
     c.setFont("Helvetica-Bold", 12)
     c.drawString(2*cm, height-2*cm, "Hash Summary")
