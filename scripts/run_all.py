@@ -75,12 +75,17 @@ def timing(label, start):
 # ---------------- LOGIC ----------------
 
 def DetermineIntensity(triaged):
+    if not triaged:
+        return "NONE"
+
     max_score = max(a["final_score"] for a in triaged)
+
     if max_score >= 0.85:
         return "HIGH"
     elif max_score >= 0.55:
         return "MEDIUM"
     return "LOW"
+
 
 def persist_artifacts(artifacts, dry_run):
     if dry_run:
@@ -230,6 +235,12 @@ def main():
 
     timing("TOTAL PIPELINE", total_start)
     print("\n✔ DFIR-AI PIPELINE EXECUTION COMPLETE\n")
+    
+    if not triaged:
+        print("\n⚠ No forensic artifacts were ingested.")
+        print("⚠ No triage or report generated.")
+        print("✔ PIPELINE TERMINATED SAFELY\n")
+        return
 
 if __name__ == "__main__":
     main()
