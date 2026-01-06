@@ -46,5 +46,11 @@
     "report_path": "reports/a67fa80a_20260106_125600_dfir_report.pdf",
     "intensity": "LOW",
     "generated_at": "2026-01-06T12:56:00.233200+00:00"
+  },
+  {
+    "case_id": "570156c6",
+    "report_path": "reports/570156c6_20260106_130015_full.pdf",
+    "intensity": "LOW",
+    "generated_at": "2026-01-06T13:00:16.136057+00:00"
   }
 ]
