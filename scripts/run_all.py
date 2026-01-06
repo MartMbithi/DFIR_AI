@@ -17,6 +17,7 @@ Run:
   python -m scripts.run_all [--dry-run] [--no-llm]
 """
 
+import json
 import time
 import argparse
 import mysql.connector
@@ -96,34 +97,35 @@ def persist_artifacts(artifacts, dry_run):
 
     for a in artifacts:
         cur.execute(
-            """
-            INSERT IGNORE INTO forensic_artifacts (
-                artifact_id, case_id, artifact_type, source_tool,
-                source_file, host_id, user_context,
-                artifact_timestamp, artifact_path,
-                content_summary, raw_content,
-                md5, sha1, sha256, metadata, ingested_at
-            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-            """,
-            (
-                a["artifact_id"],
-                a["case_id"],
-                a["artifact_type"],
-                a["source_tool"],
-                a["source_file"],
-                a["host_id"],
-                a["user_context"],
-                a["artifact_timestamp"],
-                a["artifact_path"],
-                a["content_summary"],
-                a["raw_content"],
-                a["md5"],
-                a["sha1"],
-                a["sha256"],
-                str(a["metadata"]),
-                a["ingested_at"],
-            )
+        """
+        INSERT IGNORE INTO forensic_artifacts (
+            artifact_id, case_id, artifact_type, source_tool,
+            source_file, host_id, user_context,
+            artifact_timestamp, artifact_path,
+            content_summary, raw_content,
+            md5, sha1, sha256, metadata, ingested_at
+        ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """,
+        (
+            a["artifact_id"],
+            a["case_id"],
+            a["artifact_type"],
+            a["source_tool"],
+            a["source_file"],
+            a["host_id"],
+            a["user_context"],
+            a["artifact_timestamp"],
+            a["artifact_path"],
+            a["content_summary"],
+            a["raw_content"],
+            a.get("md5"),
+            a.get("sha1"),
+            a.get("sha256"),
+            json.dumps(a.get("metadata") or {}),
+            a["ingested_at"]
         )
+    )
+
 
     conn.commit()
     cur.close()
@@ -197,7 +199,7 @@ def main():
 
     #  HARD GUARD (ADD THIS)
     if not raw_artifacts:
-        print("\n⚠ No forensic artifacts were ingested.")
+        print("\nNo forensic artifacts were ingested.")
         print("Ingestion completed but no detector matched log content.")
         print("PIPELINE TERMINATED SAFELY\n")
         return
