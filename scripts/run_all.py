@@ -189,11 +189,18 @@ def main():
 
     total_start = time.time()
 
-    # STEP 1: Ingest files
+   # STEP 1: Ingest files
     t = time.time()
     raw_artifacts = DiscoverAndParseRawFiles()
     ok(f"Discovered {len(raw_artifacts)} raw artifacts")
     timing("File ingestion", t)
+
+    # 🚨 HARD GUARD (ADD THIS)
+    if not raw_artifacts:
+        print("\n⚠ No forensic artifacts were ingested.")
+        print("⚠ Check data/raw/ paths and detector patterns.")
+        print("✔ PIPELINE TERMINATED SAFELY\n")
+        return
 
     # STEP 2: Normalize indicators
     t = time.time()
