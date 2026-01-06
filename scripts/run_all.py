@@ -3,29 +3,38 @@ DFIR-AI :: Command-Line Forensic Pipeline
 ========================================
 
 Features:
+✔ File-based ingestion (data/raw/)
+✔ Indicator normalization
 ✔ ASCII progress bars
 ✔ Execution timing
 ✔ CLI flags
 ✔ Persistent triage results
 ✔ Optional LLM narrative generation
+✔ Severity-based report generation (TXT / PDF)
+✔ Case-level report index
 
 Run:
   python -m scripts.run_all [--dry-run] [--no-llm]
 """
 
-import json
 import time
 import argparse
 import mysql.connector
-from datetime import datetime
+from datetime import datetime, timezone
+
 from triage.triage_engine import TriageArtifact
 from triage.triage_storage import TriageStore
 from triage_semantic.hybrid_scorer import HybridScore
+
+from ingestion.file_ingest import DiscoverAndParseRawFiles
+from utils.indicator_normalizer import NormalizeIndicators
+
 from narrative.prompt_builder import BuildIncidentSummaryPrompt
 from narrative.narrative_generator import NarrativeGenerator
 from narrative_llm.openai_client import OpenAILLMClient
-from ingestion.file_ingest import DiscoverAndParseRawFiles
-from utils.indicator_normalizer import NormalizeIndicators
+
+from reporting.report_writer import WriteTXTReport, WritePDFReport
+from reporting.report_index import UpdateReportIndex
 
 # ---------------- CONFIG ----------------
 
@@ -35,8 +44,6 @@ DB_CONFIG = {
     "password": "",
     "database": "dfir_ai"
 }
-
-DATA_PATH = "data/test_artifacts.json"
 
 INVESTIGATION_GOAL = (
     "Identify malicious execution, persistence mechanisms, "
@@ -61,18 +68,19 @@ def progress(step, total, label):
 def ok(msg):
     print(f"\n   ✔ {msg}")
 
-def fail(msg):
-    print(f"\n   ✖ {msg}")
-
 def timing(label, start):
     elapsed = time.time() - start
     print(f"   ⏱ {label} completed in {elapsed:.2f}s")
 
-# ---------------- CORE PIPELINE ----------------
+# ---------------- LOGIC ----------------
 
-def load_artifacts():
-    with open(DATA_PATH, "r") as f:
-        return json.load(f)
+def DetermineIntensity(triaged):
+    max_score = max(a["final_score"] for a in triaged)
+    if max_score >= 0.85:
+        return "HIGH"
+    elif max_score >= 0.55:
+        return "MEDIUM"
+    return "LOW"
 
 def persist_artifacts(artifacts, dry_run):
     if dry_run:
@@ -93,12 +101,22 @@ def persist_artifacts(artifacts, dry_run):
             ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             """,
             (
-                a["artifact_id"], a["case_id"], a["artifact_type"],
-                a["source_tool"], a["source_file"], a["host_id"],
-                a["user_context"], a["artifact_timestamp"],
-                a["artifact_path"], a["content_summary"],
-                a["raw_content"], a["md5"], a["sha1"],
-                a["sha256"], a["metadata"], a["ingested_at"]
+                a["artifact_id"],
+                a["case_id"],
+                a["artifact_type"],
+                a["source_tool"],
+                a["source_file"],
+                a["host_id"],
+                a["user_context"],
+                a["artifact_timestamp"],
+                a["artifact_path"],
+                a["content_summary"],
+                a["raw_content"],
+                a["md5"],
+                a["sha1"],
+                a["sha256"],
+                str(a["metadata"]),
+                a["ingested_at"],
             )
         )
 
@@ -126,13 +144,18 @@ def run_triage(artifacts, dry_run):
                 "artifact_id": a["artifact_id"],
                 "triage_score": hybrid["final_score"],
                 "score_breakdown": hybrid,
-                "triaged_at": datetime.utcnow()
+                "triaged_at": datetime.now(timezone.utc)
             })
 
         triaged.append({
             "artifact_id": a["artifact_id"],
             "artifact_type": a["artifact_type"],
             "content_summary": a["content_summary"],
+            "artifact_timestamp": a["artifact_timestamp"],
+            "md5": a["md5"],
+            "sha1": a["sha1"],
+            "sha256": a["sha256"],
+            "metadata": a.get("metadata"),
             **hybrid
         })
 
@@ -153,51 +176,57 @@ def main():
     parser = argparse.ArgumentParser(
         description="DFIR-AI Autonomous Forensic Pipeline"
     )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Run pipeline without database writes"
-    )
-    parser.add_argument(
-        "--no-llm",
-        action="store_true",
-        help="Disable LLM narrative generation"
-    )
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--no-llm", action="store_true")
 
     args = parser.parse_args()
-
     banner()
 
     total_start = time.time()
 
-    # Step 1: Load
+    # STEP 1: Ingest files
     t = time.time()
-    artifacts = load_artifacts()
-    ok(f"Loaded {len(artifacts)} forensic artifacts")
-    timing("Artifact loading", t)
+    raw_artifacts = DiscoverAndParseRawFiles()
+    ok(f"Discovered {len(raw_artifacts)} raw artifacts")
+    timing("File ingestion", t)
 
-    # Step 2: Persist artifacts
+    # STEP 2: Normalize indicators
+    t = time.time()
+    artifacts = [NormalizeIndicators(a) for a in raw_artifacts]
+    ok("Indicator normalization completed")
+    timing("Indicator normalization", t)
+
+    # STEP 3: Persist artifacts
     t = time.time()
     persist_artifacts(artifacts, args.dry_run)
     ok("Artifacts persisted" if not args.dry_run else "Dry-run: artifact persistence skipped")
     timing("Artifact persistence", t)
 
-    # Step 3: Triage
+    # STEP 4: Triage
     t = time.time()
     triaged = run_triage(artifacts, args.dry_run)
-    ok("Triage completed and persisted" if not args.dry_run else "Dry-run: triage persistence skipped")
+    ok("Triage completed" if not args.dry_run else "Dry-run: triage skipped")
     timing("Triage execution", t)
 
-    # Step 4: Narrative
+    # STEP 5: Narrative
     t = time.time()
     narrative = generate_narrative(triaged, args.no_llm)
     ok("Narrative generated" if not args.no_llm else "LLM disabled")
     timing("Narrative generation", t)
 
-    print("\n" + "-" * 70)
-    print("FORENSIC NARRATIVE OUTPUT")
-    print("-" * 70)
-    print(narrative)
+    # STEP 6: Reporting
+    intensity = DetermineIntensity(triaged)
+    case_id = triaged[0]["artifact_id"][:8]
+
+    if intensity == "HIGH":
+        report_path = WritePDFReport(case_id, narrative, triaged)
+    elif intensity == "MEDIUM":
+        report_path = WriteTXTReport(case_id, narrative, "detailed")
+    else:
+        report_path = WriteTXTReport(case_id, narrative, "summary")
+
+    UpdateReportIndex(case_id, report_path, intensity)
+    ok(f"Forensic report generated: {report_path}")
 
     timing("TOTAL PIPELINE", total_start)
     print("\n✔ DFIR-AI PIPELINE EXECUTION COMPLETE\n")
