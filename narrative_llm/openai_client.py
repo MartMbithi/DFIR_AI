@@ -18,11 +18,14 @@ class OpenAILLMClient:
         self.client = OpenAI(api_key=api_key)
 
     def generate(self, prompt):
-        response = self.client.responses.create(
-            model=self.model,
-            input=prompt,
-            temperature=self.temperature,
-            max_output_tokens=self.max_tokens,
-        )
+        kwargs = {
+            "model": self.model,
+            "input": prompt,
+            "max_output_tokens": self.max_tokens,
+        }
 
+        # GPT-5 models do NOT support temperature
+        if not self.model.startswith("gpt-5"):
+            kwargs["temperature"] = self.temperature
+        response = self.client.responses.create(**kwargs)
         return response.output_text
