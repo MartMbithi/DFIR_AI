@@ -195,12 +195,13 @@ def main():
     ok(f"Discovered {len(raw_artifacts)} raw artifacts")
     timing("File ingestion", t)
 
-    # 🚨 HARD GUARD (ADD THIS)
+    #  HARD GUARD (ADD THIS)
     if not raw_artifacts:
         print("\n⚠ No forensic artifacts were ingested.")
-        print("⚠ Check data/raw/ paths and detector patterns.")
-        print("✔ PIPELINE TERMINATED SAFELY\n")
+        print("Ingestion completed but no detector matched log content.")
+        print("PIPELINE TERMINATED SAFELY\n")
         return
+
 
     # STEP 2: Normalize indicators
     t = time.time()
