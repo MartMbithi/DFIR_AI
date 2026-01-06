@@ -34,5 +34,11 @@
     "report_path": "reports/64fab232_20260106_115149_full.pdf",
     "intensity": "LOW",
     "generated_at": "2026-01-06T11:51:49.443049+00:00"
+  },
+  {
+    "case_id": "d3025b4d",
+    "report_path": "reports/d3025b4d_20260106_115331_full.pdf",
+    "intensity": "LOW",
+    "generated_at": "2026-01-06T11:53:31.643872+00:00"
   }
 ]

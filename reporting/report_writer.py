@@ -14,7 +14,7 @@ from reportlab.platypus import (
 )
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.enums import TA_JUSTIFY
+from reportlab.lib.enums import TA_LEFT
 from reportlab.lib.units import cm
 from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics
@@ -103,7 +103,7 @@ def WritePDFReport(case_id, narrative, triaged):
             fontName=font,
             fontSize=10.5,
             leading=21,  # double spacing
-            alignment=TA_JUSTIFY,
+            alignment=TA_LEFT,
             spaceAfter=12
         ),
         "mono": ParagraphStyle(
@@ -111,7 +111,7 @@ def WritePDFReport(case_id, narrative, triaged):
             fontName=font,
             fontSize=9.5,
             leading=19,
-            alignment=TA_JUSTIFY,
+            alignment=TA_LEFT,
             spaceAfter=8
         )
     }
