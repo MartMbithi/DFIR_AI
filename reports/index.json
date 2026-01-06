@@ -10,5 +10,29 @@
     "report_path": "reports/65a23c52_20260106_102005_full.pdf",
     "intensity": "LOW",
     "generated_at": "2026-01-06T10:20:05.760415+00:00"
+  },
+  {
+    "case_id": "75eca784",
+    "report_path": "reports/75eca784_20260106_114313_detailed.txt",
+    "intensity": "LOW",
+    "generated_at": "2026-01-06T11:43:13.348640+00:00"
+  },
+  {
+    "case_id": "75eca784",
+    "report_path": "reports/75eca784_20260106_114313_full.pdf",
+    "intensity": "LOW",
+    "generated_at": "2026-01-06T11:43:13.349015+00:00"
+  },
+  {
+    "case_id": "64fab232",
+    "report_path": "reports/64fab232_20260106_115149_detailed.txt",
+    "intensity": "LOW",
+    "generated_at": "2026-01-06T11:51:49.442660+00:00"
+  },
+  {
+    "case_id": "64fab232",
+    "report_path": "reports/64fab232_20260106_115149_full.pdf",
+    "intensity": "LOW",
+    "generated_at": "2026-01-06T11:51:49.443049+00:00"
   }
 ]

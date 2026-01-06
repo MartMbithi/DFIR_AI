@@ -218,13 +218,13 @@ def main():
     intensity = DetermineIntensity(triaged)
     case_id = triaged[0]["artifact_id"][:8]
 
-    txt_report = WriteTXTReport(case_id, narrative, "detailed", triaged)
+    #txt_report = WriteTXTReport(case_id, narrative, "detailed", triaged)
     pdf_report = WritePDFReport(case_id, narrative, triaged)
 
-    UpdateReportIndex(case_id, txt_report, intensity)
+    #UpdateReportIndex(case_id, txt_report, intensity)
     UpdateReportIndex(case_id, pdf_report, intensity)
 
-    ok(f"TXT report generated: {txt_report}")
+    #ok(f"TXT report generated: {txt_report}")
     ok(f"PDF report generated: {pdf_report}")
 
 

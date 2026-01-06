@@ -200,7 +200,7 @@ def WritePDFReport(case_id, narrative, triaged):
 
     table = Table(
         timeline_rows,
-        colWidths=[5 * cm, 10.5 * cm],
+        colWidths=[6 * cm, 10.5 * cm],
         repeatRows=1
     )
 
