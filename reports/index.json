@@ -4,5 +4,17 @@
     "report_path": "reports/e61b16df_20260106_095548_summary.txt",
     "intensity": "LOW",
     "generated_at": "2026-01-06T09:55:48.401474+00:00"
+  },
+  {
+    "case_id": "a629f43e",
+    "report_path": "reports/a629f43e_20260106_100958_detailed.txt",
+    "intensity": "LOW",
+    "generated_at": "2026-01-06T10:09:58.562089+00:00"
+  },
+  {
+    "case_id": "a629f43e",
+    "report_path": "reports/a629f43e_20260106_100958_full.pdf",
+    "intensity": "LOW",
+    "generated_at": "2026-01-06T10:09:58.563758+00:00"
   }
 ]
