@@ -1,20 +1,14 @@
 [
   {
-    "case_id": "e61b16df",
-    "report_path": "reports/e61b16df_20260106_095548_summary.txt",
+    "case_id": "65a23c52",
+    "report_path": "reports/65a23c52_20260106_102005_detailed.txt",
     "intensity": "LOW",
-    "generated_at": "2026-01-06T09:55:48.401474+00:00"
+    "generated_at": "2026-01-06T10:20:05.760220+00:00"
   },
   {
-    "case_id": "a629f43e",
-    "report_path": "reports/a629f43e_20260106_100958_detailed.txt",
+    "case_id": "65a23c52",
+    "report_path": "reports/65a23c52_20260106_102005_full.pdf",
     "intensity": "LOW",
-    "generated_at": "2026-01-06T10:09:58.562089+00:00"
-  },
-  {
-    "case_id": "a629f43e",
-    "report_path": "reports/a629f43e_20260106_100958_full.pdf",
-    "intensity": "LOW",
-    "generated_at": "2026-01-06T10:09:58.563758+00:00"
+    "generated_at": "2026-01-06T10:20:05.760415+00:00"
   }
 ]
