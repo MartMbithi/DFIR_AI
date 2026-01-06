@@ -2,6 +2,21 @@ import os
 from ingestion.parsers.autopsy_parser import ParseAutopsyCsv
 from ingestion.parsers.bulk_extractor_parser import ParseBulkExtractor
 from ingestion.parsers.os_log_parser import ParseOSLogs
+from ingestion.detectors.auth_detector import AuthDetector
+from ingestion.detectors.web_attack_detector import WebAttackDetector
+from ingestion.detectors.network_detector import NetworkDetector
+from ingestion.detectors.process_detector import ProcessDetector
+from ingestion.detectors.file_detector import FileDetector
+from ingestion.detectors.system_detector import SystemDetector
+
+DETECTORS = [
+    WebAttackDetector(),
+    AuthDetector(),
+    NetworkDetector(),
+    ProcessDetector(),
+    FileDetector(),
+    SystemDetector()
+]
 
 def DiscoverAndParseRawFiles(raw_dir="data/raw"):
     artifacts = []
