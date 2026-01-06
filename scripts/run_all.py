@@ -24,6 +24,8 @@ from triage_semantic.hybrid_scorer import HybridScore
 from narrative.prompt_builder import BuildIncidentSummaryPrompt
 from narrative.narrative_generator import NarrativeGenerator
 from narrative_llm.openai_client import OpenAILLMClient
+from ingestion.file_ingest import DiscoverAndParseRawFiles
+from utils.indicator_normalizer import NormalizeIndicators
 
 # ---------------- CONFIG ----------------
 
