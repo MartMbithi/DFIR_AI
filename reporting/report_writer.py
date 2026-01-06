@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import cm
+from collections import defaultdict
 
 OUTPUT_DIR = "reports"
 
@@ -30,6 +31,16 @@ def WriteTXTReport(case_id, narrative, intensity, hash_summary=None):
                 f.write(f"{h}\n")
 
     return path
+
+def group_by_ip(triaged):
+    groups = defaultdict(list)
+    for a in triaged:
+        for i in a.get("metadata", {}).get("interpretation", []):
+            if "IP" in i:
+                ip = i.split("IP ")[1].split()[0]
+                groups[ip].append(a)
+    return groups
+
 
 def WritePDFReport(case_id, narrative, triaged_artifacts):
     _ensure_output_dir()

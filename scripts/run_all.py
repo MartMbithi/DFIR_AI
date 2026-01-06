@@ -218,15 +218,15 @@ def main():
     intensity = DetermineIntensity(triaged)
     case_id = triaged[0]["artifact_id"][:8]
 
-    if intensity == "HIGH":
-        report_path = WritePDFReport(case_id, narrative, triaged)
-    elif intensity == "MEDIUM":
-        report_path = WriteTXTReport(case_id, narrative, "detailed", triaged)
-    else:
-        report_path = WriteTXTReport(case_id, narrative, "summary", triaged)
+    txt_report = WriteTXTReport(case_id, narrative, "detailed", triaged)
+    pdf_report = WritePDFReport(case_id, narrative, triaged)
 
-    UpdateReportIndex(case_id, report_path, intensity)
-    ok(f"Report generated: {report_path}")
+    UpdateReportIndex(case_id, txt_report, intensity)
+    UpdateReportIndex(case_id, pdf_report, intensity)
+
+    ok(f"TXT report generated: {txt_report}")
+    ok(f"PDF report generated: {pdf_report}")
+
 
     timing("TOTAL PIPELINE", total_start)
     holo_print("CASE SEALED")
