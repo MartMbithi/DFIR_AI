@@ -10,5 +10,11 @@
     "report_path": "reports/7048efd2_20260106_142712_dfir_full_report.pdf",
     "intensity": "LOW",
     "generated_at": "2026-01-06T14:27:12.606521+00:00"
+  },
+  {
+    "case_id": "979b0a6d",
+    "report_path": "reports/979b0a6d_20260106_144742_dfir_full_report.pdf",
+    "intensity": "LOW",
+    "generated_at": "2026-01-06T14:47:42.938818+00:00"
   }
 ]
