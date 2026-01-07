@@ -94,7 +94,7 @@ def DiscoverAndParseRawFiles(case_id="AUTOCASE"):
 
     for root, _, files in os.walk(RAW_DIR):
         for fname in files:
-            if not fname.lower().endswith((".log", ".txt")):
+            if not fname.lower().endswith((".log", ".txt", ".json")):
                 continue
 
             path = os.path.join(root, fname)
