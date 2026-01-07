@@ -1,3 +1,4 @@
+
 import os
 from dotenv import load_dotenv
 
@@ -12,5 +13,5 @@ DB_CONFIG = {
 
 OPENAI_CONFIG = {
     "api_key": os.getenv("OPENAI_API_KEY"),
-    "model": os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    "model": os.getenv("OPENAI_MODEL")
 }
