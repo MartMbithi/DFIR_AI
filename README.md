@@ -133,7 +133,3 @@ Large Language Models are used **strictly for narrative assistance** and do not 
 All forensic decisions remain deterministic, explainable, and auditable.  
 This design ensures the system is suitable for academic evaluation, professional DFIR use, and legal scrutiny.
 
----
-
-## Thesis Context
-DFIR-AI was developed as part of an academic research thesis investigating how AI-assisted automation can enhance digital forensic workflows **without compromising forensic integrity or legal defensibility**.
