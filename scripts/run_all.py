@@ -73,6 +73,8 @@ import mysql.connector
 # ===== Config & Console FX =====
 from config.settings import DB_CONFIG
 from utils.console_fx import holo_print, pulse, stage
+from narrative.narrative_generator import NarrativeGenerator
+
 
 # ===== Core Engines =====
 from triage.triage_engine import TriageArtifact
@@ -215,14 +217,14 @@ def run_triage(artifacts, dry_run):
     return triaged
 
 
-def generate_narrative(triaged, no_llm):
-    if no_llm or not triaged:
-        return "[LLM DISABLED OR NO DATA] Narrative generation skipped."
+def generate_narrative(triaged, no_llm=False):
+    if no_llm:
+        return "[LLM disabled] Narrative generation skipped."
 
-    prompt = BuildIncidentSummaryPrompt(triaged)
-    llm = OpenAILLMClient()
-    generator = NarrativeGenerator(llm)
-    return generator.Generate(prompt)
+    generator = NarrativeGenerator()
+    batch_narratives = generator.GenerateBatched(triaged)
+    return generator.Synthesize(batch_narratives)
+
 
 # ---------------- MAIN ----------------
 
