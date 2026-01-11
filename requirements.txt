@@ -21,3 +21,6 @@ pytest==8.2.0
 
 # Report Generation
 reportlab==4.1.0
+
+# TDQM
+tqdm
