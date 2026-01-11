@@ -1,13 +1,14 @@
 
 # narrative/narrative_generator.py
 
-from narrative_llm.openai_client import OpenAIClient
+from narrative_llm.openai_client import OpenAILLMClient
 from narrative.batching import chunk_artifacts, build_batch_prompt
 import time
 
+
 class NarrativeGenerator:
     def __init__(self):
-        self.llm_client = OpenAIClient()
+        self.llm_client = OpenAILLMClient()
 
     def GenerateBatched(self, triaged, batch_size=25):
         batches = list(chunk_artifacts(triaged, batch_size))
