@@ -24,3 +24,18 @@ reportlab==4.1.0
 
 # TDQM
 tqdm
+
+# --- SaaS / API layer ---
+fastapi
+uvicorn[standard]
+
+# --- Database ---
+sqlalchemy
+pymysql
+
+# --- Auth & Security ---
+python-jose[cryptography]
+passlib[bcrypt]
+
+# --- Upload handling ---
+python-multipart
