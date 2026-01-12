@@ -63,37 +63,54 @@
 #   paid—if any. No drama, no big payouts, just pixels and code.
 #
 #
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from datetime import datetime
+import uuid
+
 from backend.db.session import get_db
 from backend.models.organizations import Organization
 from backend.models.users import User
 from backend.deps import get_current_user
-import uuid
-from datetime import datetime
 
 router = APIRouter()
 
+
+# =========================
+# Schemas
+# =========================
 
 class OrganizationCreateRequest(BaseModel):
     organization_name: str
 
 
-@router.post("/")
+class OrganizationUpdateRequest(BaseModel):
+    organization_name: str
+
+
+class OrganizationResponse(BaseModel):
+    organization_id: str
+    organization_name: str
+    organization_created_at: datetime
+
+
+# =========================
+# CREATE
+# =========================
+
+@router.post("/", response_model=OrganizationResponse)
 def create_organization(
     payload: OrganizationCreateRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # Prevent user from creating multiple orgs accidentally
     if current_user.organization_id is not None:
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="User already belongs to an organization"
         )
 
-    # 1. Create organization
     org = Organization(
         organization_id=str(uuid.uuid4()),
         organization_name=payload.organization_name,
@@ -101,15 +118,112 @@ def create_organization(
     )
 
     db.add(org)
-    db.flush()  # ensures org.id exists before user update
+    db.flush()
 
-    # 2. Update user to belong to organization
     current_user.organization_id = org.organization_id
     current_user.user_role = "admin"
 
     db.commit()
+    db.refresh(org)
 
-    return {
-        "organization_id": org.organization_id,
-        "organization_name": org.organization_name
-    }
+    return org
+
+
+# =========================
+# READ (CURRENT ORG)
+# =========================
+
+@router.get("/me", response_model=OrganizationResponse)
+def get_my_organization(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if not current_user.organization_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User does not belong to an organization"
+        )
+
+    org = db.query(Organization).filter(
+        Organization.organization_id == current_user.organization_id
+    ).first()
+
+    if not org:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Organization not found"
+        )
+
+    return org
+
+
+# =========================
+# UPDATE
+# =========================
+
+@router.put("/me", response_model=OrganizationResponse)
+def update_organization(
+    payload: OrganizationUpdateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.user_role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin privileges required"
+        )
+
+    org = db.query(Organization).filter(
+        Organization.organization_id == current_user.organization_id
+    ).first()
+
+    if not org:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Organization not found"
+        )
+
+    org.organization_name = payload.organization_name
+    db.commit()
+    db.refresh(org)
+
+    return org
+
+
+# =========================
+# DELETE (DANGEROUS)
+# =========================
+
+@router.delete("/me")
+def delete_organization(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.user_role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin privileges required"
+        )
+
+    org = db.query(Organization).filter(
+        Organization.organization_id == current_user.organization_id
+    ).first()
+
+    if not org:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Organization not found"
+        )
+
+    # Unlink users first (safety)
+    db.query(User).filter(
+        User.organization_id == org.organization_id
+    ).update({
+        User.organization_id: None,
+        User.user_role: "analyst"
+    })
+
+    db.delete(org)
+    db.commit()
+
+    return {"detail": "Organization deleted successfully"}

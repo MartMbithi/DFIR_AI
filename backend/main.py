@@ -75,15 +75,23 @@ app = FastAPI(
     version="0.1.0"
 )
 
-app.include_router(auth.router, prefix="/auth", tags=["Auth"])
-app.include_router(users.router, prefix="/users", tags=["Users"])
-app.include_router(cases.router, prefix="/cases", tags=["Cases"])
-app.include_router(uploads.router, prefix="/uploads", tags=["Uploads"])
-app.include_router(reports.router, prefix="/reports", tags=["Reports"])
+app.include_router(auth.router, 
+                   prefix="/auth", tags=["Auth"])
+app.include_router(users.router, 
+                   prefix="/users", tags=["Users"])
+app.include_router(cases.router, 
+                   prefix="/cases", tags=["Cases"])
+app.include_router(uploads.router, 
+                   prefix="/uploads", tags=["Uploads"])
+app.include_router(reports.router, 
+                   prefix="/reports", tags=["Reports"])
 app.include_router(subscriptions.router,
                    prefix="/subscriptions", tags=["Subscriptions"])
+from backend.api import organizations
+
 app.include_router(
     organizations.router,
     prefix="/organizations",
     tags=["Organizations"]
 )
+
