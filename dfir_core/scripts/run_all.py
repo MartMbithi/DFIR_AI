@@ -90,8 +90,12 @@ from narrative_llm.openai_client import OpenAILLMClient
 
 from reporting.report_writer import WriteTXTReport, WritePDFReport
 from reporting.report_index import UpdateReportIndex
+import argparse
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--case-id", required=True)
+args = parser.parse_args()
 # ---------------- INVESTIGATION GOAL ----------------
 
 INVESTIGATION_GOAL = (

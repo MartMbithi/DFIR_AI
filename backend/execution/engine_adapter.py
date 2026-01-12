@@ -71,19 +71,26 @@ import os
 
 def execute_dfir_case(case_id: str):
     """
-    Execute DFIR engine as an isolated subprocess.
-    This preserves the original CLI behavior and avoids import issues.
+    Execute DFIR engine as an isolated subprocess with full
+    import-path resolution for legacy DFIR code.
     """
 
-    # Absolute path to project root (where scripts/ lives)
     project_root = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "..", "..")
     )
 
+    dfir_core_path = os.path.join(project_root, "dfir_core")
+
+    env = os.environ.copy()
+    env["PYTHONPATH"] = os.pathsep.join([
+        project_root,
+        dfir_core_path
+    ])
+
     cmd = [
         sys.executable,
         "-m",
-        "scripts.run_all",
+        "dfir_core.scripts.run_all",
         "--case-id",
         case_id
     ]
@@ -91,11 +98,14 @@ def execute_dfir_case(case_id: str):
     result = subprocess.run(
         cmd,
         cwd=project_root,
+        env=env,
         capture_output=True,
         text=True
     )
 
     if result.returncode != 0:
         raise RuntimeError(
-            f"DFIR engine failed:\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
+            "DFIR engine failed\n"
+            f"STDOUT:\n{result.stdout}\n"
+            f"STDERR:\n{result.stderr}"
         )
