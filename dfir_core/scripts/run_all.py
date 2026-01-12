@@ -63,7 +63,7 @@
 #   paid—if any. No drama, no big payouts, just pixels and code.
 #
 #
-
+import os
 import json
 import time
 import argparse
@@ -92,6 +92,7 @@ from reporting.report_writer import WriteTXTReport, WritePDFReport
 from reporting.report_index import UpdateReportIndex
 import argparse
 
+CASE_ID = os.getenv("DFIR_CASE_ID")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--case-id", required=True)

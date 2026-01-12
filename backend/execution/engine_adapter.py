@@ -63,7 +63,6 @@
 #   paid—if any. No drama, no big payouts, just pixels and code.
 #
 #
-
 import subprocess
 import sys
 import os
@@ -71,33 +70,29 @@ import os
 
 def execute_dfir_case(case_id: str):
     """
-    Execute DFIR engine as an isolated subprocess with full
-    import-path resolution for legacy DFIR code.
+    Execute DFIR engine in its native runtime context.
+    This preserves all existing imports and assumptions.
     """
 
-    project_root = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "..")
+    # Absolute path to dfir_core/
+    dfir_core_root = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "dfir_core")
     )
 
-    dfir_core_path = os.path.join(project_root, "dfir_core")
-
     env = os.environ.copy()
-    env["PYTHONPATH"] = os.pathsep.join([
-        project_root,
-        dfir_core_path
-    ])
+    env["PYTHONPATH"] = dfir_core_root  # CRITICAL
 
     cmd = [
         sys.executable,
         "-m",
-        "dfir_core.scripts.run_all",
+        "scripts.run_all",
         "--case-id",
         case_id
     ]
 
     result = subprocess.run(
         cmd,
-        cwd=project_root,
+        cwd=dfir_core_root,   # CRITICAL
         env=env,
         capture_output=True,
         text=True
