@@ -94,10 +94,15 @@ import argparse
 
 CASE_ID = os.getenv("DFIR_CASE_ID")
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--case-id", required=True)
-args = parser.parse_args()
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--case-id", required=True)
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--no-llm", action="store_true")
+    return parser.parse_args()
 # ---------------- INVESTIGATION GOAL ----------------
+
 
 INVESTIGATION_GOAL = (
     "Identify malicious execution, persistence mechanisms, "
@@ -235,11 +240,11 @@ def generate_narrative(triaged, no_llm=False):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="DFIR-AI Autonomous Forensic Pipeline")
-    parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--no-llm", action="store_true")
-    args = parser.parse_args()
+    args = parse_args()
+    case_id = args.case_id
+    dry_run = args.dry_run
+    no_llm = args.no_llm
+
 
     banner()
     total_start = time.time()
