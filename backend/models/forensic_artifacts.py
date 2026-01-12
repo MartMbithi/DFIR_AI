@@ -67,7 +67,7 @@
 from sqlalchemy import Column, String, DateTime, Text
 from sqlalchemy.dialects.mysql import CHAR
 from sqlalchemy.sql import func
-from backend.db.base import Base
+from backend.db.session import Base
 
 
 class ForensicArtifact(Base):
@@ -93,5 +93,6 @@ class ForensicArtifact(Base):
     sha1 = Column(CHAR(40), nullable=True)
     sha256 = Column(CHAR(64), nullable=True)
 
-    metadata = Column(Text, nullable=True)  # JSON string
+
+    metadata_json = Column("metadata", Text)
     ingested_at = Column(DateTime, nullable=False, server_default=func.now())

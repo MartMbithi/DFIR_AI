@@ -64,10 +64,8 @@
 #
 #
 
-from backend.api import artifacts
-from backend.api import organizations
 from fastapi import FastAPI
-from backend.api import auth, users, cases, uploads, reports, subscriptions, organizations
+from backend.api import auth, users, cases, uploads, reports, subscriptions, organizations, artifacts
 from dotenv import load_dotenv
 load_dotenv()
 
