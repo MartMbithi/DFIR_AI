@@ -3,7 +3,7 @@
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#   
+#
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -64,42 +64,171 @@
 #
 #
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from datetime import datetime
+import uuid
+
 from backend.db.session import get_db
 from backend.models.cases import Case
+from backend.models.users import User
 from backend.deps import get_current_user
-import uuid, datetime
 
 router = APIRouter()
 
-@router.post("/")
+
+# =========================
+# Schemas
+# =========================
+
+class CaseCreateRequest(BaseModel):
+    case_name: str
+    case_description: str | None = None
+
+
+class CaseUpdateRequest(BaseModel):
+    case_name: str | None = None
+    case_status: str | None = None
+
+
+class CaseResponse(BaseModel):
+    case_id: str
+    case_name: str
+    case_description: str | None
+    case_status: str
+    organization_id: str
+    user_id: str
+    case_created_at: datetime
+
+
+# =========================
+# CREATE
+# =========================
+
+@router.post("/", response_model=CaseResponse)
 def create_case(
-    case_name: str,
+    payload: CaseCreateRequest,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
+    if not current_user.organization_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User does not belong to an organization"
+        )
+
     case = Case(
         case_id=str(uuid.uuid4()),
-        case_name=case_name,
+        case_name=payload.case_name,
+        case_description=payload.case_description,
         organization_id=current_user.organization_id,
         user_id=current_user.user_id,
         case_status="created",
-        case_created_at=datetime.datetime.utcnow()
+        case_created_at=datetime.utcnow()
     )
+
     db.add(case)
     db.commit()
-    return {"case_id": case.case_id}
+    db.refresh(case)
 
-@router.get("/{case_id}")
+    return case
+
+
+# =========================
+# READ (LIST)
+# =========================
+
+@router.get("/", response_model=list[CaseResponse])
+def list_cases(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return db.query(Case).filter(
+        Case.organization_id == current_user.organization_id
+    ).all()
+
+
+# =========================
+# READ (SINGLE)
+# =========================
+
+@router.get("/{case_id}", response_model=CaseResponse)
 def get_case(
     case_id: str,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     case = db.query(Case).filter(
         Case.case_id == case_id,
         Case.organization_id == current_user.organization_id
     ).first()
 
+    if not case:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Case not found"
+        )
+
     return case
+
+
+# =========================
+# UPDATE
+# =========================
+
+@router.put("/{case_id}", response_model=CaseResponse)
+def update_case(
+    case_id: str,
+    payload: CaseUpdateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    case = db.query(Case).filter(
+        Case.case_id == case_id,
+        Case.organization_id == current_user.organization_id
+    ).first()
+
+    if not case:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Case not found"
+        )
+
+    if payload.case_name is not None:
+        case.case_name = payload.case_name
+
+    if payload.case_status is not None:
+        case.case_status = payload.case_status
+
+    db.commit()
+    db.refresh(case)
+
+    return case
+
+
+# =========================
+# DELETE
+# =========================
+
+@router.delete("/{case_id}")
+def delete_case(
+    case_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    case = db.query(Case).filter(
+        Case.case_id == case_id,
+        Case.organization_id == current_user.organization_id
+    ).first()
+
+    if not case:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Case not found"
+        )
+
+    db.delete(case)
+    db.commit()
+
+    return {"detail": "Case deleted successfully"}
