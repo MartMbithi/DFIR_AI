@@ -1,5 +1,5 @@
 #
-#   Crafted On Sun Jan 11 2026
+#   Crafted On Mon Jan 12 2026
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
@@ -64,46 +64,121 @@
 #
 #
 
-from backend.api import artifacts
-from backend.api import organizations
-from fastapi import FastAPI
-from backend.api import auth, users, cases, uploads, reports, subscriptions, organizations
-from dotenv import load_dotenv
-load_dotenv()
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from typing import Optional
+from datetime import datetime
+import uuid
+import json
 
-app = FastAPI(
-    title="DFIR-AI SaaS Backend",
-    description="Backend API for DFIR-AI forensic automation platform",
-    version="0.1.0"
-)
+from backend.db.session import get_db
+from backend.models.forensic_artifacts import ForensicArtifact
+from backend.models.cases import Case
+from backend.models.users import User
+from backend.deps import get_current_user
 
-app.include_router(auth.router,
-                   prefix="/auth", tags=["Auth"])
-app.include_router(users.router,
-                   prefix="/users", tags=["Users"])
-
-app.include_router(uploads.router,
-                   prefix="/uploads", tags=["Uploads"])
-app.include_router(reports.router,
-                   prefix="/reports", tags=["Reports"])
-app.include_router(subscriptions.router,
-                   prefix="/subscriptions", tags=["Subscriptions"])
-
-app.include_router(
-    organizations.router,
-    prefix="/organizations",
-    tags=["Organizations"]
-)
-
-app.include_router(
-    cases.router,
-    prefix="/cases",
-    tags=["Cases"]
-)
+router = APIRouter()
 
 
-app.include_router(
-    artifacts.router,
-    prefix="/artifacts",
-    tags=["Artifacts"]
-)
+# =========================
+# Schemas
+# =========================
+
+class ArtifactCreateRequest(BaseModel):
+    case_id: str
+    artifact_type: Optional[str] = None
+    source_tool: Optional[str] = None
+    source_file: Optional[str] = None
+    host_id: Optional[str] = None
+    user_context: Optional[str] = None
+    artifact_timestamp: Optional[datetime] = None
+    artifact_path: Optional[str] = None
+    content_summary: Optional[str] = None
+    raw_content: Optional[str] = None
+    md5: Optional[str] = None
+    sha1: Optional[str] = None
+    sha256: Optional[str] = None
+    metadata: Optional[dict] = None
+
+
+class ArtifactResponse(BaseModel):
+    artifact_id: str
+    case_id: str
+    artifact_type: Optional[str]
+    ingested_at: datetime
+
+
+# =========================
+# CREATE
+# =========================
+
+@router.post("/", response_model=ArtifactResponse)
+def create_artifact(
+    payload: ArtifactCreateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # Ensure case belongs to user's organization
+    case = db.query(Case).filter(
+        Case.case_id == payload.case_id,
+        Case.organization_id == current_user.organization_id
+    ).first()
+
+    if not case:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Case not found or access denied"
+        )
+
+    artifact = ForensicArtifact(
+        artifact_id=str(uuid.uuid4()),
+        case_id=payload.case_id,
+        artifact_type=payload.artifact_type,
+        source_tool=payload.source_tool,
+        source_file=payload.source_file,
+        host_id=payload.host_id,
+        user_context=payload.user_context,
+        artifact_timestamp=payload.artifact_timestamp,
+        artifact_path=payload.artifact_path,
+        content_summary=payload.content_summary,
+        raw_content=payload.raw_content,
+        md5=payload.md5,
+        sha1=payload.sha1,
+        sha256=payload.sha256,
+        metadata=json.dumps(payload.metadata) if payload.metadata else None,
+        ingested_at=datetime.utcnow()
+    )
+
+    db.add(artifact)
+    db.commit()
+    db.refresh(artifact)
+
+    return artifact
+
+
+# =========================
+# LIST BY CASE
+# =========================
+
+@router.get("/", response_model=list[ArtifactResponse])
+def list_artifacts(
+    case_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # Verify case ownership
+    case = db.query(Case).filter(
+        Case.case_id == case_id,
+        Case.organization_id == current_user.organization_id
+    ).first()
+
+    if not case:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Case not found or access denied"
+        )
+
+    return db.query(ForensicArtifact).filter(
+        ForensicArtifact.case_id == case_id
+    ).all()

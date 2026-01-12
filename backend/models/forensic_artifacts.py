@@ -1,5 +1,5 @@
 #
-#   Crafted On Sun Jan 11 2026
+#   Crafted On Mon Jan 12 2026
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
@@ -64,46 +64,34 @@
 #
 #
 
-from backend.api import artifacts
-from backend.api import organizations
-from fastapi import FastAPI
-from backend.api import auth, users, cases, uploads, reports, subscriptions, organizations
-from dotenv import load_dotenv
-load_dotenv()
-
-app = FastAPI(
-    title="DFIR-AI SaaS Backend",
-    description="Backend API for DFIR-AI forensic automation platform",
-    version="0.1.0"
-)
-
-app.include_router(auth.router,
-                   prefix="/auth", tags=["Auth"])
-app.include_router(users.router,
-                   prefix="/users", tags=["Users"])
-
-app.include_router(uploads.router,
-                   prefix="/uploads", tags=["Uploads"])
-app.include_router(reports.router,
-                   prefix="/reports", tags=["Reports"])
-app.include_router(subscriptions.router,
-                   prefix="/subscriptions", tags=["Subscriptions"])
-
-app.include_router(
-    organizations.router,
-    prefix="/organizations",
-    tags=["Organizations"]
-)
-
-app.include_router(
-    cases.router,
-    prefix="/cases",
-    tags=["Cases"]
-)
+from sqlalchemy import Column, String, DateTime, Text
+from sqlalchemy.dialects.mysql import CHAR
+from sqlalchemy.sql import func
+from backend.db.base import Base
 
 
-app.include_router(
-    artifacts.router,
-    prefix="/artifacts",
-    tags=["Artifacts"]
-)
+class ForensicArtifact(Base):
+    __tablename__ = "forensic_artifacts"
+
+    artifact_id = Column(CHAR(36), primary_key=True)
+    case_id = Column(String(100), nullable=False)
+
+    artifact_type = Column(String(50), nullable=True)
+    source_tool = Column(String(50), nullable=True)
+    source_file = Column(Text, nullable=True)
+
+    host_id = Column(String(100), nullable=True)
+    user_context = Column(String(100), nullable=True)
+
+    artifact_timestamp = Column(DateTime, nullable=True)
+    artifact_path = Column(Text, nullable=True)
+
+    content_summary = Column(Text, nullable=True)
+    raw_content = Column(Text, nullable=True)
+
+    md5 = Column(CHAR(32), nullable=True)
+    sha1 = Column(CHAR(40), nullable=True)
+    sha256 = Column(CHAR(64), nullable=True)
+
+    metadata = Column(Text, nullable=True)  # JSON string
+    ingested_at = Column(DateTime, nullable=False, server_default=func.now())
