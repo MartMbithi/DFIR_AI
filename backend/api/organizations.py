@@ -3,7 +3,7 @@
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#   
+#
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -63,14 +63,15 @@
 #   paid—if any. No drama, no big payouts, just pixels and code.
 #
 #
-
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from backend.db.session import get_db
 from backend.models.organizations import Organization
+from backend.models.users import User
 from backend.deps import get_current_user
-import uuid, datetime
+import uuid
+from datetime import datetime
 
 router = APIRouter()
 
@@ -83,18 +84,29 @@ class OrganizationCreateRequest(BaseModel):
 def create_organization(
     payload: OrganizationCreateRequest,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
+    # Prevent user from creating multiple orgs accidentally
+    if current_user.organization_id is not None:
+        raise HTTPException(
+            status_code=400,
+            detail="User already belongs to an organization"
+        )
+
+    # 1. Create organization
     org = Organization(
         organization_id=str(uuid.uuid4()),
         organization_name=payload.organization_name,
-        organization_created_at=datetime.datetime.utcnow()
+        organization_created_at=datetime.utcnow()
     )
 
+    db.add(org)
+    db.flush()  # ensures org.id exists before user update
+
+    # 2. Update user to belong to organization
     current_user.organization_id = org.organization_id
     current_user.user_role = "admin"
 
-    db.add(org)
     db.commit()
 
     return {
