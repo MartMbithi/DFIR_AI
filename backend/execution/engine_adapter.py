@@ -3,7 +3,7 @@
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#   
+#
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -64,14 +64,38 @@
 #
 #
 
+import subprocess
+import sys
+import os
+
+
 def execute_dfir_case(case_id: str):
     """
-    Adapter for existing DFIR engine.
-    Must call the same logic run_all.py uses internally.
+    Execute DFIR engine as an isolated subprocess.
+    This preserves the original CLI behavior and avoids import issues.
     """
 
-    # Example – adapt to your real engine entry
-    from scripts.run_all import main as dfir_main
+    # Absolute path to project root (where scripts/ lives)
+    project_root = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..")
+    )
 
-    # Simulate CLI invocation
-    dfir_main(case_id=case_id)
+    cmd = [
+        sys.executable,
+        "-m",
+        "scripts.run_all",
+        "--case-id",
+        case_id
+    ]
+
+    result = subprocess.run(
+        cmd,
+        cwd=project_root,
+        capture_output=True,
+        text=True
+    )
+
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"DFIR engine failed:\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
+        )
