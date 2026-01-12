@@ -77,66 +77,34 @@ from backend.execution.job_progress_store import (
 from backend.models.jobs import Job
 
 
-def run_dfir_job(
-    job_id: str,
-    db: Session,
-    dfir_callable,
-):
-    """
-    Executes a DFIR job with Phase 6.4 progress, ETA and stage tracking.
-    DFIR engine remains opaque and untouched.
-    """
-
+def run_dfir_job(job_id: str, db: Session, dfir_callable):
     job = db.query(Job).filter(Job.job_id == job_id).first()
     if not job:
         return
 
-    t0 = time()
-    current_stage = "initializing"
-
     try:
-        # ---------------- INITIALIZING ----------------
-        start_stage(db, job_id, "initializing")
         job.job_status = "running"
+        job.job_stage = "ingestion"
+        job.job_progress = "ingesting artifacts"
+        job.job_progress_percent = 20
         job.started_at = datetime.utcnow()
-        update_job_stage(db, job_id, "initializing", 5, None)
+        db.commit()
 
-        # ---------------- INGESTION ----------------
-        end_stage(db, job_id, "initializing")
         start_stage(db, job_id, "ingestion")
-        update_job_stage(db, job_id, "ingestion", 20, None)
-
-        # ---------------- DFIR ENGINE EXECUTION ----------------
-        # Engine internally performs:
-        # ingestion → normalization → triage → semantic → reporting
-        # We treat this as ONE opaque execution boundary
         dfir_callable(job.case_id)
-
-        # ---------------- FINALIZING ----------------
         end_stage(db, job_id, "ingestion")
-        start_stage(db, job_id, "finalizing")
-        update_job_stage(db, job_id, "finalizing", 95, None)
-
-        # ---------------- COMPLETED ----------------
-        end_stage(db, job_id, "finalizing")
-        update_job_stage(db, job_id, "completed", 100, 0)
 
         job.job_status = "completed"
+        job.job_stage = "completed"
+        job.job_progress = "completed"
+        job.job_progress_percent = 100
         job.completed_at = datetime.utcnow()
         db.commit()
+
 
     except Exception:
         job.job_status = "failed"
-        job.job_error = traceback.format_exc()
+        job.job_stage = "failed"
         job.completed_at = datetime.utcnow()
-
-        # Preserve last known stage & progress
-        update_job_stage(
-            db,
-            job_id,
-            job.job_stage or "unknown",
-            job.job_progress_percent or 0,
-            None,
-        )
-
         db.commit()
+

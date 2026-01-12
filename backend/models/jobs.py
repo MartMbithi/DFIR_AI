@@ -64,6 +64,7 @@
 #
 #
 
+from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Integer, Text
 from backend.db.session import Base
 
@@ -80,11 +81,13 @@ class Job(Base):
 
     # Phase 6.4
     job_stage = Column(String(50), nullable=True)
+    job_progress = Column(Text, nullable=True)
     job_progress_percent = Column(Integer, default=0)
     job_eta_seconds = Column(Integer, nullable=True)
 
     job_error = Column(Text, nullable=True)
-
+    
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     started_at = Column(DateTime)
     completed_at = Column(DateTime)
 

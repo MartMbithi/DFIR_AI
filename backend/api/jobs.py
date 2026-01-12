@@ -80,7 +80,7 @@ from backend.models.jobs import Job
 from backend.models.cases import Case
 from backend.models.users import User
 from backend.deps import get_current_user
-
+from backend.schemas.jobs import JobResponse
 router = APIRouter()
 
 
@@ -112,7 +112,7 @@ def create_job(
     payload: JobCreateRequest,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     case = db.query(Case).filter(
         Case.case_id == payload.case_id,
@@ -135,14 +135,17 @@ def create_job(
         case_id=payload.case_id,
         organization_id=current_user.organization_id,
         job_type=payload.job_type,
-        job_status="queued"
+        job_status="queued",
+        job_stage="queued",
+        job_progress="queued",
+        job_progress_percent=0,
     )
 
     db.add(job)
     db.commit()
     db.refresh(job)
 
-    #  ASYNC EXECUTION
+    # ✅ BACKGROUND EXECUTION (unchanged)
     background_tasks.add_task(
         run_dfir_job,
         job.job_id,
@@ -150,7 +153,22 @@ def create_job(
         execute_dfir_case
     )
 
-    return job
+    return {
+        "job_id": job.job_id,
+        "case_id": job.case_id,
+        "organization_id": job.organization_id,
+        "job_type": job.job_type,
+        "job_status": job.job_status,
+
+        "job_stage": job.job_stage or "queued",
+        "job_progress": job.job_progress or "queued",
+        "job_progress_percent": job.job_progress_percent or 0,
+        "job_eta_seconds": job.job_eta_seconds,
+
+        "created_at": job.created_at,
+        "started_at": job.started_at,
+        "completed_at": job.completed_at,
+    }
 
 
 # =========================
