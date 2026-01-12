@@ -64,63 +64,22 @@
 #
 #
 
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
-from sqlalchemy.orm import Session
-from backend.db.session import get_db
-from backend.deps import get_current_user
-from backend.models.cases import Case
-from backend.models.case_uploads import CaseUpload
-from backend.storage.file_storage import save_uploaded_file
-import uuid
+from sqlalchemy import Column, String, Text, DateTime, BigInteger
+from backend.db.session import Base
 from datetime import datetime
 
-router = APIRouter()
+class CaseUpload(Base):
+    __tablename__ = "case_uploads"
 
+    upload_id = Column(String(36), primary_key=True, index=True)
+    case_id = Column(String(100), nullable=False)
+    organization_id = Column(String(36), nullable=False)
+    user_id = Column(String(36), nullable=False)
 
-@router.post("/{case_id}/artifacts/upload")
-def upload_case_artifact(
-    case_id: str,
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
-):
-    #  Validate case ownership
-    case = (
-        db.query(Case)
-        .filter(
-            Case.case_id == case_id,
-            Case.organization_id == current_user.organization_id,
-        )
-        .first()
-    )
+    upload_filename = Column(String(255), nullable=False)
+    upload_path = Column(Text, nullable=False)
+    upload_size = Column(BigInteger, nullable=False)
+    upload_mime_type = Column(String(100))
 
-    if not case:
-        raise HTTPException(status_code=404, detail="Case not found")
-
-    # Save file to disk
-    content = file.file.read()
-    stored_path = save_uploaded_file(case_id, file.filename, content)
-
-    #  Persist upload metadata
-    upload = CaseUpload(
-        upload_id=str(uuid.uuid4()),
-        case_id=case_id,
-        organization_id=current_user.organization_id,
-        user_id=current_user.user_id,
-        upload_filename=file.filename,
-        upload_path=stored_path,
-        upload_size=len(content),
-        upload_mime_type=file.content_type,
-        uploaded_at=datetime.utcnow(),
-    )
-
-    db.add(upload)
-    db.commit()
-
-    #  Response
-    return {
-        "upload_id": upload.upload_id,
-        "filename": file.filename,
-        "stored_path": stored_path,
-        "case_id": case_id,
-    }
+    upload_status = Column(String(50), default="uploaded")
+    uploaded_at = Column(DateTime, default=datetime.utcnow)
