@@ -63,6 +63,7 @@
 #   paid—if any. No drama, no big payouts, just pixels and code.
 #
 #
+
 import os
 import json
 import time
@@ -72,7 +73,7 @@ import mysql.connector
 
 # ===== Config & Console FX =====
 from config.settings import DB_CONFIG
-from utils.console_fx import holo_print, pulse, stage
+from utils.console_fx import holo_print, pulse, safe_print, stage
 from narrative.narrative_generator import NarrativeGenerator
 
 
@@ -115,22 +116,20 @@ INVESTIGATION_GOAL = (
 
 
 def banner():
-    holo_print("INITIALIZING DFIR-AI CORE …")
-    holo_print("LINKING DETERMINISTIC + SEMANTIC ENGINES …")
-    #print("\n" + "█" * 70)
-    print("  DFIR-AI :: AUTONOMOUS DIGITAL FORENSIC PIPELINE")
-    print("  MODE   : HYBRID ANALYSIS")
-    print("  STATUS : OPERATIONAL")
-    #print("█" * 70 + "\n")
+    holo_print("INITIALIZING DFIR-AI CORE ...")
+    holo_print("LINKING DETERMINISTIC + SEMANTIC ENGINES ...")
+    safe_print("  DFIR-AI :: AUTONOMOUS DIGITAL FORENSIC PIPELINE")
+    safe_print("  MODE   : HYBRID ANALYSIS")
+    safe_print("  STATUS : OPERATIONAL")
 
 
 def ok(msg):
-    holo_print(f" {msg}")
+    holo_print(f" [OK] {msg}")
 
 
 def timing(label, start):
     elapsed = time.time() - start
-    print(f"    {label} completed in {elapsed:.2f}s")
+    print(f"   [TIME] {label} completed in {elapsed:.2f}s")
 
 # ---------------- LOGIC ----------------
 
@@ -247,7 +246,6 @@ def main():
     dry_run = args.dry_run
     no_llm = args.no_llm
 
-
     banner()
     total_start = time.time()
 
@@ -316,7 +314,7 @@ def main():
     timing("TOTAL PIPELINE", total_start)
     holo_print("CASE SEALED")
     holo_print("FORENSIC CHAIN INTACT")
-    print("\n✔ DFIR-AI PIPELINE EXECUTION COMPLETE\n")
+    safe_print("\n[OK] DFIR-AI PIPELINE EXECUTION COMPLETE\n")
 
 
 if __name__ == "__main__":

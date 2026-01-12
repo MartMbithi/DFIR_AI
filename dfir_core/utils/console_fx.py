@@ -63,32 +63,54 @@
 #   paid—if any. No drama, no big payouts, just pixels and code.
 #
 #
-
 import sys
 import time
 import random
 
-GLYPHS = ["▌", "▀", "■", "▖", "▘", "▙", "▛"]
+# ==============================
+# Safe console output
+# ==============================
+
+def safe_print(text="", end="\n"):
+    try:
+        print(text, end=end)
+    except UnicodeEncodeError:
+        print(text.encode("ascii", "ignore").decode(), end=end)
+
+
+def safe_write(text):
+    try:
+        sys.stdout.write(text)
+        sys.stdout.flush()
+    except UnicodeEncodeError:
+        sys.stdout.write(text.encode("ascii", "ignore").decode())
+        sys.stdout.flush()
+
+
+# ==============================
+# Visual effects (safe)
+# ==============================
+
+GLYPHS = ["|", "/", "-", "\\"]  # ASCII-safe spinner
 
 
 def holo_print(text, delay=0.015):
     for c in text:
-        sys.stdout.write(c)
-        sys.stdout.flush()
+        safe_write(c)
         time.sleep(delay)
-    print()
+    safe_print()
 
 
 def pulse(label, duration=1.2):
-    end = time.time() + duration
-    while time.time() < end:
-        sys.stdout.write(f"\r⧖ {label} {random.choice(GLYPHS)}")
-        sys.stdout.flush()
+    end_time = time.time() + duration
+    while time.time() < end_time:
+        safe_write(f"\r... {label} {random.choice(GLYPHS)}")
         time.sleep(0.08)
-    print("\r", end="")
+    safe_write("\r")
 
 
 def stage(title):
-    print("\n" + "═" * 70)
-    print(f"⟢ {title.upper()}")
-    print("═" * 70)
+    bar = "=" * 70
+    safe_print("\n" + bar)
+    safe_print(f">>> {title.upper()}")
+    safe_print(bar)
