@@ -73,18 +73,18 @@ class Job(Base):
 
     job_id = Column(String(36), primary_key=True)
     case_id = Column(String(36), nullable=False)
+    organization_id = Column(String(36), nullable=False)
+
     job_type = Column(String(50))
     job_status = Column(String(20))
 
-    # --- Phase 6.4 fields ---
+    # Phase 6.4
     job_stage = Column(String(50), nullable=True)
     job_progress_percent = Column(Integer, default=0)
     job_eta_seconds = Column(Integer, nullable=True)
 
-    # legacy / optional
-    job_progress = Column(String(50), nullable=True)
     job_error = Column(Text, nullable=True)
 
-    created_at = Column(DateTime)
     started_at = Column(DateTime)
     completed_at = Column(DateTime)
+

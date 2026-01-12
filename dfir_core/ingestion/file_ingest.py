@@ -63,7 +63,6 @@
 #   paid—if any. No drama, no big payouts, just pixels and code.
 #
 #
-
 import os
 import socket
 from ingestion.detectors.web_attack_detector import WebAttackDetector
@@ -73,7 +72,8 @@ from ingestion.detectors.system_detector import SystemDetector
 from ingestion.detectors.process_detector import ProcessDetector
 from ingestion.detectors.file_detector import FileDetector
 
-RAW_DIR = "data/raw"
+# Default fallback (CLI / legacy mode)
+DEFAULT_RAW_DIR = "data/raw"
 
 DETECTORS = [
     WebAttackDetector(),
@@ -88,11 +88,13 @@ DETECTORS = [
 def DiscoverAndParseRawFiles(case_id="AUTOCASE"):
     artifacts = []
 
-    if not os.path.isdir(RAW_DIR):
-        print(f"Raw data directory not found: {RAW_DIR}")
+    raw_dir = os.getenv("DFIR_INPUT_DIR", DEFAULT_RAW_DIR)
+
+    if not os.path.isdir(raw_dir):
+        print(f"Raw data directory not found: {raw_dir}")
         return artifacts
 
-    for root, _, files in os.walk(RAW_DIR):
+    for root, _, files in os.walk(raw_dir):
         for fname in files:
             if not fname.lower().endswith((".log", ".txt", ".json")):
                 continue
@@ -109,7 +111,7 @@ def DiscoverAndParseRawFiles(case_id="AUTOCASE"):
                         context = {
                             "case_id": case_id,
                             "file": path,
-                            "host": socket.gethostname()
+                            "host": socket.gethostname(),
                         }
 
                         for detector in DETECTORS:
@@ -119,6 +121,6 @@ def DiscoverAndParseRawFiles(case_id="AUTOCASE"):
                                 break
 
             except Exception as e:
-                print(f"✖ Failed reading {path}: {e}")
+                print(f"Failed reading {path}: {e}")
 
     return artifacts

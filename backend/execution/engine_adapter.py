@@ -71,7 +71,7 @@ import os
 def execute_dfir_case(case_id: str):
     """
     Execute DFIR engine in its native runtime context.
-    This preserves all existing imports and assumptions.
+    Preserves all DFIR core assumptions.
     """
 
     # Absolute path to dfir_core/
@@ -79,8 +79,14 @@ def execute_dfir_case(case_id: str):
         os.path.join(os.path.dirname(__file__), "..", "..", "dfir_core")
     )
 
+    #  Uploaded files live here
+    upload_dir = os.path.abspath(
+        os.path.join("data", "cases", case_id, "uploads")
+    )
+
     env = os.environ.copy()
-    env["PYTHONPATH"] = dfir_core_root  # CRITICAL
+    env["PYTHONPATH"] = dfir_core_root              # REQUIRED
+    env["DFIR_INPUT_DIR"] = upload_dir              # 🔥 Phase 7.3 key
 
     cmd = [
         sys.executable,
@@ -92,7 +98,7 @@ def execute_dfir_case(case_id: str):
 
     result = subprocess.run(
         cmd,
-        cwd=dfir_core_root,   # CRITICAL
+        cwd=dfir_core_root,   # REQUIRED
         env=env,
         capture_output=True,
         text=True
