@@ -3,7 +3,7 @@
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#   
+#
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -64,25 +64,27 @@
 #
 #
 
-from sqlalchemy import Column, String, DateTime, Text
-from sqlalchemy.dialects.mysql import CHAR
-from sqlalchemy.sql import func
+from sqlalchemy import Column, String, DateTime, Integer, Text
 from backend.db.session import Base
 
 
 class Job(Base):
     __tablename__ = "jobs"
 
-    job_id = Column(CHAR(36), primary_key=True)
-    case_id = Column(String(100), nullable=False)
-    organization_id = Column(String(36), nullable=False)
+    job_id = Column(String(36), primary_key=True)
+    case_id = Column(String(36), nullable=False)
+    job_type = Column(String(50))
+    job_status = Column(String(20))
 
-    job_type = Column(String(50), nullable=False)  # e.g. "dfir_run"
-    job_status = Column(String(50), nullable=False)  # queued | running | completed | failed
+    # --- Phase 6.4 fields ---
+    job_stage = Column(String(50), nullable=True)
+    job_progress_percent = Column(Integer, default=0)
+    job_eta_seconds = Column(Integer, nullable=True)
 
-    job_progress = Column(String(50), nullable=True)  # optional textual stage
+    # legacy / optional
+    job_progress = Column(String(50), nullable=True)
     job_error = Column(Text, nullable=True)
 
-    created_at = Column(DateTime, nullable=False, server_default=func.now())
-    started_at = Column(DateTime, nullable=True)
-    completed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime)
+    started_at = Column(DateTime)
+    completed_at = Column(DateTime)
