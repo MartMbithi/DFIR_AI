@@ -64,15 +64,27 @@
 #
 #
 
-from sqlalchemy import Column, String, DateTime, Enum, ForeignKey
-from backend.db.session import Base
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.orm import Session
+from backend.db.session import get_db
+from backend.models.users import User
+from backend.security import decode_token
 
-class Subscription(Base):
-    __tablename__ = "subscriptions"
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-    subscription_id = Column(String(36), primary_key=True)
-    organization_id = Column(String(36), ForeignKey("organizations.organization_id"))
-    plan_id = Column(String(36), ForeignKey("plans.plan_id"))
-    subscription_status = Column(Enum("active","expired","cancelled"))
-    subscription_started_at = Column(DateTime)
-    subscription_expires_at = Column(DateTime)
+def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    payload = decode_token(token)
+    if not payload:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
+    user_id = payload.get("sub")
+    user = db.query(User).filter(User.user_id == user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
+    return user

@@ -1,5 +1,5 @@
 #
-#   Crafted On Sun Jan 11 2026
+#   Crafted On Mon Jan 12 2026
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
@@ -64,14 +64,42 @@
 #
 #
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from backend.db.session import get_db
+from backend.models.cases import Case
+from backend.deps import get_current_user
+import uuid, datetime
 
 router = APIRouter()
 
 @router.post("/")
-def create_case():
-    return {"message": "Create case"}
+def create_case(
+    case_name: str,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    case = Case(
+        case_id=str(uuid.uuid4()),
+        case_name=case_name,
+        organization_id=current_user.organization_id,
+        user_id=current_user.user_id,
+        case_status="created",
+        case_created_at=datetime.datetime.utcnow()
+    )
+    db.add(case)
+    db.commit()
+    return {"case_id": case.case_id}
 
 @router.get("/{case_id}")
-def get_case(case_id: str):
-    return {"case_id": case_id}
+def get_case(
+    case_id: str,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    case = db.query(Case).filter(
+        Case.case_id == case_id,
+        Case.organization_id == current_user.organization_id
+    ).first()
+
+    return case

@@ -1,5 +1,5 @@
 #
-#   Crafted On Sun Jan 11 2026
+#   Crafted On Mon Jan 12 2026
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
@@ -64,14 +64,33 @@
 #
 #
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from backend.db.session import get_db
+from backend.models.users import User
+from backend.security import hash_password
+from backend.deps import get_current_user
+import uuid
 
 router = APIRouter()
 
 @router.post("/")
-def create_user():
-    return {"message": "Create user"}
+def create_user(email: str, password: str, organization_id: str, db: Session = Depends(get_db)):
+    user = User(
+        user_id=str(uuid.uuid4()),
+        user_email=email,
+        user_password_hash=hash_password(password),
+        organization_id=organization_id,
+        user_role="analyst"
+    )
+    db.add(user)
+    db.commit()
+    return {"user_id": user.user_id}
 
 @router.get("/me")
-def get_me():
-    return {"message": "Get current user"}
+def get_me(current_user = Depends(get_current_user)):
+    return {
+        "user_id": current_user.user_id,
+        "email": current_user.user_email,
+        "role": current_user.user_role
+    }

@@ -1,5 +1,5 @@
 #
-#   Crafted On Sun Jan 11 2026
+#   Crafted On Mon Jan 12 2026
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
@@ -64,10 +64,20 @@
 #
 #
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from backend.db.session import get_db
+from backend.models.users import User
+from backend.security import verify_password, create_access_token
 
 router = APIRouter()
 
 @router.post("/login")
-def login():
-    return {"message": "Login endpoint (to be implemented)"}
+def login(email: str, password: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_email == email).first()
+
+    if not user or not verify_password(password, user.user_password_hash):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
+    token = create_access_token({"sub": user.user_id})
+    return {"access_token": token, "token_type": "bearer"}
