@@ -63,13 +63,17 @@
 #   paid—if any. No drama, no big payouts, just pixels and code.
 #
 #
-
 from datetime import datetime
 from sqlalchemy.orm import Session
 import traceback
 from time import time
+
 from backend.execution.progress import STAGE_TO_PERCENT
-from backend.execution.job_progress_store import update_job_stage, start_stage, end_stage
+from backend.execution.job_progress_store import (
+    update_job_stage,
+    start_stage,
+    end_stage,
+)
 from backend.models.jobs import Job
 
 
@@ -79,50 +83,60 @@ def run_dfir_job(
     dfir_callable,
 ):
     """
-    Executes a DFIR job safely.
-    dfir_callable is your existing DFIR engine entrypoint.
+    Executes a DFIR job with Phase 6.4 progress, ETA and stage tracking.
+    DFIR engine remains opaque and untouched.
     """
 
     job = db.query(Job).filter(Job.job_id == job_id).first()
     if not job:
         return
 
+    t0 = time()
+    current_stage = "initializing"
+
     try:
-        t0 = time()
-
-
-start_stage(db, job_id, "initializing")
-update_job_stage(db, job_id, "initializing", 5, None)
-
-# before ingestion
-start_stage(db, job_id, "ingestion")
-# ... run ingestion ...
-end_stage(db, job_id, "ingestion")
-update_job_stage(db, job_id, "ingestion", 20, 300)
-
-# repeat for normalization, triage, semantic_analysis, report_generation
-
-update_job_stage(db, job_id, "completed", 100, 0)
-
-        # Mark job running
+        # ---------------- INITIALIZING ----------------
+        start_stage(db, job_id, "initializing")
         job.job_status = "running"
         job.started_at = datetime.utcnow()
-        job.job_progress = "initializing"
-        db.commit()
+        update_job_stage(db, job_id, "initializing", 5, None)
 
-        # ---- DFIR ENGINE EXECUTION ----
-        #  DO NOT MODIFY ENGINE CODE
+        # ---------------- INGESTION ----------------
+        end_stage(db, job_id, "initializing")
+        start_stage(db, job_id, "ingestion")
+        update_job_stage(db, job_id, "ingestion", 20, None)
+
+        # ---------------- DFIR ENGINE EXECUTION ----------------
+        # Engine internally performs:
+        # ingestion → normalization → triage → semantic → reporting
+        # We treat this as ONE opaque execution boundary
         dfir_callable(job.case_id)
-        # --------------------------------
 
-        # Mark completed
+        # ---------------- FINALIZING ----------------
+        end_stage(db, job_id, "ingestion")
+        start_stage(db, job_id, "finalizing")
+        update_job_stage(db, job_id, "finalizing", 95, None)
+
+        # ---------------- COMPLETED ----------------
+        end_stage(db, job_id, "finalizing")
+        update_job_stage(db, job_id, "completed", 100, 0)
+
         job.job_status = "completed"
         job.completed_at = datetime.utcnow()
-        job.job_progress = "completed"
         db.commit()
 
-    except Exception as e:
+    except Exception:
         job.job_status = "failed"
         job.job_error = traceback.format_exc()
         job.completed_at = datetime.utcnow()
+
+        # Preserve last known stage & progress
+        update_job_stage(
+            db,
+            job_id,
+            job.job_stage or "unknown",
+            job.job_progress_percent or 0,
+            None,
+        )
+
         db.commit()

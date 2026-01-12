@@ -65,7 +65,7 @@
 #
 
 from sqlalchemy import Column, String, DateTime, Integer
-from backend.db.base import Base
+from backend.db.session import Base
 
 class JobStageEvent(Base):
     __tablename__ = "job_stage_events"
