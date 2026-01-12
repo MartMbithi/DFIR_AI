@@ -101,6 +101,8 @@ def parse_args():
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--no-llm", action="store_true")
     return parser.parse_args()
+
+
 # ---------------- INVESTIGATION GOAL ----------------
 
 
@@ -115,20 +117,20 @@ INVESTIGATION_GOAL = (
 def banner():
     holo_print("INITIALIZING DFIR-AI CORE …")
     holo_print("LINKING DETERMINISTIC + SEMANTIC ENGINES …")
-    print("\n" + "█" * 70)
+    #print("\n" + "█" * 70)
     print("  DFIR-AI :: AUTONOMOUS DIGITAL FORENSIC PIPELINE")
     print("  MODE   : HYBRID ANALYSIS")
     print("  STATUS : OPERATIONAL")
-    print("█" * 70 + "\n")
+    #print("█" * 70 + "\n")
 
 
 def ok(msg):
-    holo_print(f"✔ {msg}")
+    holo_print(f" {msg}")
 
 
 def timing(label, start):
     elapsed = time.time() - start
-    print(f"   ⏱ {label} completed in {elapsed:.2f}s")
+    print(f"    {label} completed in {elapsed:.2f}s")
 
 # ---------------- LOGIC ----------------
 
