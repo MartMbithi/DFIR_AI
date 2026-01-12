@@ -3,7 +3,7 @@
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#   
+#
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -73,19 +73,28 @@ SECRET_KEY = os.getenv("JWT_SECRET", "CHANGE_ME")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    bcrypt__rounds=12
+)
+
 
 def hash_password(password: str) -> str:
+    if len(password.encode("utf-8")) > 72:
+        raise ValueError("Password exceeds bcrypt 72-byte limit")
     return pwd_context.hash(password)
+
 
 def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
+
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
 
 def decode_token(token: str):
     try:
