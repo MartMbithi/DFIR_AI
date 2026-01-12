@@ -3,7 +3,7 @@
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#   
+#
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -64,16 +64,19 @@
 #
 #
 
-from sqlalchemy import Column, String, DateTime, Enum, ForeignKey
+from sqlalchemy import Column, String, DateTime, Enum, ForeignKey, Text
 from backend.db.session import Base
 import datetime
+
 
 class Case(Base):
     __tablename__ = "cases"
 
     case_id = Column(String(100), primary_key=True)
-    organization_id = Column(String(36), ForeignKey("organizations.organization_id"))
+    organization_id = Column(String(36), ForeignKey(
+        "organizations.organization_id"))
     user_id = Column(String(36), ForeignKey("users.user_id"))
+    case_description = Column(Text, nullable=True)
     case_name = Column(String(150), nullable=False)
-    case_status = Column(Enum("created","processing","completed","failed"))
+    case_status = Column(Enum("created", "processing", "completed", "failed"))
     case_created_at = Column(DateTime, default=datetime.datetime.utcnow)
