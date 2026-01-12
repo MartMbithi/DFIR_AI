@@ -3,7 +3,7 @@
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#   
+#
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -70,12 +70,19 @@ from backend.db.session import get_db
 from backend.models.users import User
 from backend.security import hash_password
 from backend.deps import get_current_user
+from typing import Optional
 import uuid
 
 router = APIRouter()
 
+
 @router.post("/")
-def create_user(email: str, password: str, organization_id: str, db: Session = Depends(get_db)):
+def create_user(
+    email: str,
+    password: str,
+    organization_id: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
     user = User(
         user_id=str(uuid.uuid4()),
         user_email=email,
@@ -87,8 +94,9 @@ def create_user(email: str, password: str, organization_id: str, db: Session = D
     db.commit()
     return {"user_id": user.user_id}
 
+
 @router.get("/me")
-def get_me(current_user = Depends(get_current_user)):
+def get_me(current_user=Depends(get_current_user)):
     return {
         "user_id": current_user.user_id,
         "email": current_user.user_email,
