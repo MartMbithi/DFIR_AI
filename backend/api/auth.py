@@ -3,7 +3,7 @@
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#   
+#
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -69,15 +69,27 @@ from sqlalchemy.orm import Session
 from backend.db.session import get_db
 from backend.models.users import User
 from backend.security import verify_password, create_access_token
+from pydantic import BaseModel, EmailStr
+
 
 router = APIRouter()
 
+
 @router.post("/login")
-def login(email: str, password: str, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.user_email == email).first()
+def login(
+    payload: LoginRequest,
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.user_email == payload.email).first()
 
-    if not user or not verify_password(password, user.user_password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    if not user or not verify_password(payload.password, user.user_password_hash):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    token = create_access_token({"sub": user.user_id})
-    return {"access_token": token, "token_type": "bearer"}
+    access_token = create_access_token(
+        data={"sub": user.user_id}
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
