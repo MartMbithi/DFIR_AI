@@ -66,6 +66,8 @@
 
 from fastapi import FastAPI
 from backend.api import auth, users, cases, uploads, reports, subscriptions
+from dotenv import load_dotenv
+load_dotenv()
 
 app = FastAPI(
     title="DFIR-AI SaaS Backend",
