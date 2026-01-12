@@ -64,7 +64,6 @@
 #
 #
 
-from backend.api import case_artifacts
 from backend.api import jobs_progress
 from backend.api import jobs
 from fastapi import FastAPI
@@ -122,9 +121,9 @@ app.include_router(
     tags=["Jobs"]
 )
 
-
 app.include_router(
     case_artifacts.router,
     prefix="/cases",
     tags=["Artifacts"],
 )
+
