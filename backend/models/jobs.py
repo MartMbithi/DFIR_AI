@@ -1,9 +1,9 @@
 #
-#   Crafted On Sun Jan 11 2026
+#   Crafted On Mon Jan 12 2026
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#
+#   
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -64,52 +64,25 @@
 #
 #
 
-from backend.api import jobs
-from fastapi import FastAPI
-from backend.api import auth, users, cases, uploads, reports, subscriptions, organizations, artifacts, jobs
-from dotenv import load_dotenv
-load_dotenv()
-
-app = FastAPI(
-    title="DFIR-AI SaaS Backend",
-    description="Backend API for DFIR-AI forensic automation platform",
-    version="0.1.0"
-)
-
-app.include_router(auth.router,
-                   prefix="/auth", tags=["Auth"])
-app.include_router(users.router,
-                   prefix="/users", tags=["Users"])
-
-app.include_router(uploads.router,
-                   prefix="/uploads", tags=["Uploads"])
-app.include_router(reports.router,
-                   prefix="/reports", tags=["Reports"])
-app.include_router(subscriptions.router,
-                   prefix="/subscriptions", tags=["Subscriptions"])
-
-app.include_router(
-    organizations.router,
-    prefix="/organizations",
-    tags=["Organizations"]
-)
-
-app.include_router(
-    cases.router,
-    prefix="/cases",
-    tags=["Cases"]
-)
+from sqlalchemy import Column, String, DateTime, Text
+from sqlalchemy.dialects.mysql import CHAR
+from sqlalchemy.sql import func
+from backend.db.session import Base
 
 
-app.include_router(
-    artifacts.router,
-    prefix="/artifacts",
-    tags=["Artifacts"]
-)
+class Job(Base):
+    __tablename__ = "jobs"
 
+    job_id = Column(CHAR(36), primary_key=True)
+    case_id = Column(String(100), nullable=False)
+    organization_id = Column(String(36), nullable=False)
 
-app.include_router(
-    jobs.router,
-    prefix="/jobs",
-    tags=["Jobs"]
-)
+    job_type = Column(String(50), nullable=False)  # e.g. "dfir_run"
+    job_status = Column(String(50), nullable=False)  # queued | running | completed | failed
+
+    job_progress = Column(String(50), nullable=True)  # optional textual stage
+    job_error = Column(Text, nullable=True)
+
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    started_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
