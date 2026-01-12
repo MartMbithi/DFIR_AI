@@ -1,9 +1,9 @@
 #
-#   Crafted On Sun Jan 11 2026
+#   Crafted On Mon Jan 12 2026
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#
+#   
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -64,55 +64,40 @@
 #
 #
 
-from backend.api import jobs_progress
-from backend.api import jobs
-from fastapi import FastAPI
-from backend.api import auth, users, cases, uploads, reports, subscriptions, organizations, artifacts, jobs
-from dotenv import load_dotenv
-load_dotenv()
+import uuid
+from datetime import datetime
+from sqlalchemy.orm import Session
+from backend.models.jobs import Job
+from backend.models.job_stage_events import JobStageEvent
 
-app = FastAPI(
-    title="DFIR-AI SaaS Backend",
-    description="Backend API for DFIR-AI forensic automation platform",
-    version="0.1.0"
-)
+def update_job_stage(db: Session, job_id: str, stage: str, percent: int, eta: int | None):
+    job = db.query(Job).filter(Job.job_id == job_id).first()
+    if not job:
+        return
+    job.job_stage = stage
+    job.job_progress_percent = percent
+    job.job_eta_seconds = eta
+    db.commit()
 
-app.include_router(auth.router,
-                   prefix="/auth", tags=["Auth"])
-app.include_router(users.router,
-                   prefix="/users", tags=["Users"])
+def start_stage(db: Session, job_id: str, stage: str):
+    evt = JobStageEvent(
+        stage_event_id=str(uuid.uuid4()),
+        job_id=job_id,
+        stage_name=stage,
+        stage_started_at=datetime.utcnow(),
+    )
+    db.add(evt)
+    db.commit()
 
-app.include_router(uploads.router,
-                   prefix="/uploads", tags=["Uploads"])
-app.include_router(reports.router,
-                   prefix="/reports", tags=["Reports"])
-app.include_router(subscriptions.router,
-                   prefix="/subscriptions", tags=["Subscriptions"])
-
-app.include_router(
-    organizations.router,
-    prefix="/organizations",
-    tags=["Organizations"]
-)
-
-app.include_router(
-    cases.router,
-    prefix="/cases",
-    tags=["Cases"]
-)
-
-
-app.include_router(
-    artifacts.router,
-    prefix="/artifacts",
-    tags=["Artifacts"]
-)
-
-
-app.include_router(
-    jobs.router,
-    prefix="/jobs",
-    tags=["Jobs"]
-)
-
-app.include_router(jobs_progress.router, prefix="/jobs", tags=["Jobs"])
+def end_stage(db: Session, job_id: str, stage: str):
+    evt = (
+        db.query(JobStageEvent)
+        .filter(JobStageEvent.job_id == job_id, JobStageEvent.stage_name == stage, JobStageEvent.stage_completed_at == None)
+        .order_by(JobStageEvent.stage_started_at.desc())
+        .first()
+    )
+    if not evt:
+        return
+    evt.stage_completed_at = datetime.utcnow()
+    evt.duration_seconds = int((evt.stage_completed_at - evt.stage_started_at).total_seconds())
+    db.commit()

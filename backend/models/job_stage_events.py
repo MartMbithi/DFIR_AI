@@ -1,9 +1,9 @@
 #
-#   Crafted On Sun Jan 11 2026
+#   Crafted On Mon Jan 12 2026
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#
+#   
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -64,55 +64,15 @@
 #
 #
 
-from backend.api import jobs_progress
-from backend.api import jobs
-from fastapi import FastAPI
-from backend.api import auth, users, cases, uploads, reports, subscriptions, organizations, artifacts, jobs
-from dotenv import load_dotenv
-load_dotenv()
+from sqlalchemy import Column, String, DateTime, Integer
+from backend.db.base import Base
 
-app = FastAPI(
-    title="DFIR-AI SaaS Backend",
-    description="Backend API for DFIR-AI forensic automation platform",
-    version="0.1.0"
-)
+class JobStageEvent(Base):
+    __tablename__ = "job_stage_events"
 
-app.include_router(auth.router,
-                   prefix="/auth", tags=["Auth"])
-app.include_router(users.router,
-                   prefix="/users", tags=["Users"])
-
-app.include_router(uploads.router,
-                   prefix="/uploads", tags=["Uploads"])
-app.include_router(reports.router,
-                   prefix="/reports", tags=["Reports"])
-app.include_router(subscriptions.router,
-                   prefix="/subscriptions", tags=["Subscriptions"])
-
-app.include_router(
-    organizations.router,
-    prefix="/organizations",
-    tags=["Organizations"]
-)
-
-app.include_router(
-    cases.router,
-    prefix="/cases",
-    tags=["Cases"]
-)
-
-
-app.include_router(
-    artifacts.router,
-    prefix="/artifacts",
-    tags=["Artifacts"]
-)
-
-
-app.include_router(
-    jobs.router,
-    prefix="/jobs",
-    tags=["Jobs"]
-)
-
-app.include_router(jobs_progress.router, prefix="/jobs", tags=["Jobs"])
+    stage_event_id = Column(String(36), primary_key=True)
+    job_id = Column(String(36), index=True, nullable=False)
+    stage_name = Column(String(50), nullable=False)
+    stage_started_at = Column(DateTime, nullable=False)
+    stage_completed_at = Column(DateTime, nullable=True)
+    duration_seconds = Column(Integer, nullable=True)

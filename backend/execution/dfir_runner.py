@@ -3,7 +3,7 @@
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#   
+#
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -67,7 +67,9 @@
 from datetime import datetime
 from sqlalchemy.orm import Session
 import traceback
-
+from time import time
+from backend.execution.progress import STAGE_TO_PERCENT
+from backend.execution.job_progress_store import update_job_stage, start_stage, end_stage
 from backend.models.jobs import Job
 
 
@@ -86,6 +88,22 @@ def run_dfir_job(
         return
 
     try:
+        t0 = time()
+
+
+start_stage(db, job_id, "initializing")
+update_job_stage(db, job_id, "initializing", 5, None)
+
+# before ingestion
+start_stage(db, job_id, "ingestion")
+# ... run ingestion ...
+end_stage(db, job_id, "ingestion")
+update_job_stage(db, job_id, "ingestion", 20, 300)
+
+# repeat for normalization, triage, semantic_analysis, report_generation
+
+update_job_stage(db, job_id, "completed", 100, 0)
+
         # Mark job running
         job.job_status = "running"
         job.started_at = datetime.utcnow()
