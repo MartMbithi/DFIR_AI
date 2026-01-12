@@ -75,6 +75,11 @@ from pydantic import BaseModel, EmailStr
 router = APIRouter()
 
 
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
 @router.post("/login")
 def login(
     payload: LoginRequest,
