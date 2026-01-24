@@ -63,55 +63,60 @@
 #   paid—if any. No drama, no big payouts, just pixels and code.
 #
 #
+
 from datetime import datetime
 from sqlalchemy.orm import Session
 import traceback
-from time import time
-from backend.execution.report_registrar import register_latest_report
-from backend.execution.progress import STAGE_TO_PERCENT
-from backend.execution.job_progress_store import (
-    update_job_stage,
-    start_stage,
-    end_stage,
-)
+from backend.db.session import SessionLocal
 from backend.models.jobs import Job
+from backend.execution.report_registrar import register_latest_report
 
 
-def run_dfir_job(job_id: str, db: Session, dfir_callable):
-    job = db.query(Job).filter(Job.job_id == job_id).first()
-    if not job:
-        return
+def run_dfir_job(job_id: str, dfir_callable):
+    """
+    Executes DFIR job in isolation with its own DB session.
+    """
+
+    db: Session = SessionLocal()
 
     try:
+        job = db.query(Job).filter(Job.job_id == job_id).first()
+        if not job:
+            return
+
+        # ---- MARK RUNNING ----
         job.job_status = "running"
-        job.job_stage = "ingestion"
-        job.job_progress = "ingesting artifacts"
-        job.job_progress_percent = 20
+        job.job_stage = "execution"
         job.started_at = datetime.utcnow()
         db.commit()
 
-        start_stage(db, job_id, "ingestion")
+        # ---- EXECUTE DFIR CORE ----
         dfir_callable(job.case_id)
-        end_stage(db, job_id, "ingestion")
 
+        # ---- REGISTER REPORT ----
+        register_latest_report(
+            case_id=job.case_id,
+            db=db
+        )
+
+        # ---- MARK COMPLETED ----
+        job.job_status = "completed"
         job.job_stage = "completed"
         job.job_progress = "completed"
         job.job_progress_percent = 100
         job.completed_at = datetime.utcnow()
         db.commit()
 
-        #  REGISTER REPORT
-        register_latest_report(
-            case_id=job.case_id,
-            organization_id=job.organization_id,
-            db=db
-        )
-
-
-
     except Exception:
-        job.job_status = "failed"
-        job.job_stage = "failed"
-        job.completed_at = datetime.utcnow()
-        db.commit()
+        db.rollback()
 
+        job = db.query(Job).filter(Job.job_id == job_id).first()
+        if job:
+            job.job_status = "failed"
+            job.job_stage = "failed"
+            job.job_error = traceback.format_exc()
+            job.completed_at = datetime.utcnow()
+            db.commit()
+
+    finally:
+        db.close()

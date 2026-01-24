@@ -149,7 +149,6 @@ def create_job(
     background_tasks.add_task(
         run_dfir_job,
         job.job_id,
-        SessionLocal(),
         execute_dfir_case
     )
 

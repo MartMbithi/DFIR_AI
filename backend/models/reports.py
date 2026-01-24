@@ -74,9 +74,9 @@ class Report(Base):
 
     report_id = Column(String(36), primary_key=True, index=True)
     case_id = Column(String(100), nullable=False, index=True)
-    organization_id = Column(String(36), nullable=False, index=True)
 
-    report_type = Column(String(50), nullable=False)   # pdf / txt
+    report_type = Column(String(50), nullable=False)
     report_path = Column(Text, nullable=False)
 
-    created_at = Column(DateTime, server_default=func.now())
+    report_generated_at = Column(DateTime, server_default=func.now())
+
