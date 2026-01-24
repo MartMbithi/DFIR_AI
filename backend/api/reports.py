@@ -64,10 +64,46 @@
 #
 #
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import FileResponse
+from sqlalchemy.orm import Session
+import os
 
-router = APIRouter()
+from backend.db.session import get_db
+from backend.deps import get_current_user
+from backend.models.reports import Report
+
+router = APIRouter(prefix="/reports", tags=["Reports"])
+
 
 @router.get("/{case_id}")
-def list_reports(case_id: str):
-    return {"case_id": case_id, "reports": []}
+def list_case_reports(
+    case_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+    return db.query(Report).filter(
+        Report.case_id == case_id,
+        Report.organization_id == current_user.organization_id
+    ).all()
+
+
+@router.get("/download/{report_id}")
+def download_report(
+    report_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+    report = db.query(Report).filter(
+        Report.report_id == report_id,
+        Report.organization_id == current_user.organization_id
+    ).first()
+
+    if not report or not os.path.exists(report.report_path):
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    return FileResponse(
+        path=report.report_path,
+        filename=os.path.basename(report.report_path),
+        media_type="application/pdf"
+    )

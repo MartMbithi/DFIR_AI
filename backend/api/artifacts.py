@@ -77,8 +77,9 @@ from backend.models.forensic_artifacts import ForensicArtifact
 from backend.models.cases import Case
 from backend.models.users import User
 from backend.deps import get_current_user
-
+from backend.models.forensic_artifacts import ForensicArtifact
 router = APIRouter()
+router = APIRouter(prefix="/artifacts", tags=["Artifacts"])
 
 
 # =========================
@@ -179,6 +180,16 @@ def list_artifacts(
             detail="Case not found or access denied"
         )
 
+    return db.query(ForensicArtifact).filter(
+        ForensicArtifact.case_id == case_id
+    ).all()
+
+@router.get("/{case_id}")
+def list_case_artifacts(
+    case_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
     return db.query(ForensicArtifact).filter(
         ForensicArtifact.case_id == case_id
     ).all()
