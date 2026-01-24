@@ -71,6 +71,21 @@ from backend.api import auth, users, cases, uploads, reports, subscriptions, org
 from dotenv import load_dotenv
 load_dotenv()
 
+
+from backend.api import (
+    reports_router,
+    artifacts_router,
+    jobs_progress_router,
+)
+
+app = FastAPI()
+
+# Mount routers
+app.include_router(reports_router)
+app.include_router(artifacts_router)
+app.include_router(jobs_progress_router)
+
+
 app = FastAPI(
     title="DFIR-AI SaaS Backend",
     description="Backend API for DFIR-AI forensic automation platform",

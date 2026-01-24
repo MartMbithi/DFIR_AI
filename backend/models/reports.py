@@ -3,7 +3,7 @@
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#
+#   
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -64,6 +64,19 @@
 #
 #
 
-from backend.api.reports import router as reports_router
-from backend.api.artifacts import router as artifacts_router
-from backend.api.jobs_progress import router as jobs_progress_router
+from sqlalchemy import Column, String, DateTime, Text
+from sqlalchemy.sql import func
+from backend.db.session import Base
+
+
+class Report(Base):
+    __tablename__ = "reports"
+
+    report_id = Column(String(36), primary_key=True, index=True)
+    case_id = Column(String(100), nullable=False, index=True)
+    organization_id = Column(String(36), nullable=False, index=True)
+
+    report_type = Column(String(50), nullable=False)   # pdf / txt
+    report_path = Column(Text, nullable=False)
+
+    created_at = Column(DateTime, server_default=func.now())
