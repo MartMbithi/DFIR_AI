@@ -3,7 +3,7 @@
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#
+#   
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -63,55 +63,58 @@
 #   paid—if any. No drama, no big payouts, just pixels and code.
 #
 #
-from datetime import datetime
+
+import os
+import uuid
 from sqlalchemy.orm import Session
-import traceback
-from time import time
-from backend.execution.report_registrar import register_latest_report
-from backend.execution.progress import STAGE_TO_PERCENT
-from backend.execution.job_progress_store import (
-    update_job_stage,
-    start_stage,
-    end_stage,
+from backend.models.reports import Report
+
+
+DFIR_REPORTS_DIR = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "dfir_core", "reports")
 )
-from backend.models.jobs import Job
 
 
-def run_dfir_job(job_id: str, db: Session, dfir_callable):
-    job = db.query(Job).filter(Job.job_id == job_id).first()
-    if not job:
-        return
+def register_latest_report(
+    *,
+    case_id: str,
+    organization_id: str,
+    db: Session
+):
+    """
+    Locate the latest DFIR report for a case and persist it to the SaaS DB.
+    """
 
-    try:
-        job.job_status = "running"
-        job.job_stage = "ingestion"
-        job.job_progress = "ingesting artifacts"
-        job.job_progress_percent = 20
-        job.started_at = datetime.utcnow()
-        db.commit()
+    if not os.path.isdir(DFIR_REPORTS_DIR):
+        return None
 
-        start_stage(db, job_id, "ingestion")
-        dfir_callable(job.case_id)
-        end_stage(db, job_id, "ingestion")
+    candidates = [
+        f for f in os.listdir(DFIR_REPORTS_DIR)
+        if f.startswith(case_id) and f.lower().endswith(".pdf")
+    ]
 
-        job.job_stage = "completed"
-        job.job_progress = "completed"
-        job.job_progress_percent = 100
-        job.completed_at = datetime.utcnow()
-        db.commit()
+    if not candidates:
+        return None
 
-        #  REGISTER REPORT
-        register_latest_report(
-            case_id=job.case_id,
-            organization_id=job.organization_id,
-            db=db
-        )
+    # pick most recent
+    candidates.sort(
+        key=lambda f: os.path.getmtime(os.path.join(DFIR_REPORTS_DIR, f)),
+        reverse=True
+    )
 
+    report_file = candidates[0]
+    report_path = os.path.join(DFIR_REPORTS_DIR, report_file)
 
+    report = Report(
+        report_id=str(uuid.uuid4()),
+        case_id=case_id,
+        organization_id=organization_id,
+        report_type="pdf",
+        report_path=report_path,
+    )
 
-    except Exception:
-        job.job_status = "failed"
-        job.job_stage = "failed"
-        job.completed_at = datetime.utcnow()
-        db.commit()
+    db.add(report)
+    db.commit()
+    db.refresh(report)
 
+    return report
