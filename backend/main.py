@@ -85,7 +85,6 @@ app.include_router(reports_router)
 app.include_router(artifacts_router)
 app.include_router(jobs_progress_router)
 
-
 app = FastAPI(
     title="DFIR-AI SaaS Backend",
     description="Backend API for DFIR-AI forensic automation platform",
@@ -99,8 +98,7 @@ app.include_router(users.router,
 
 app.include_router(uploads.router,
                    prefix="/uploads", tags=["Uploads"])
-app.include_router(reports.router,
-                   prefix="/reports", tags=["Reports"])
+app.include_router(reports.router)
 app.include_router(subscriptions.router,
                    prefix="/subscriptions", tags=["Subscriptions"])
 

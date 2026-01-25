@@ -3,7 +3,7 @@
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#   
+#
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -63,27 +63,16 @@
 #   paid—if any. No drama, no big payouts, just pixels and code.
 #
 #
-
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
 
 
-class JobResponse(BaseModel):
-    job_id: str
+class ReportResponse(BaseModel):
+    report_id: str
     case_id: str
-    organization_id: str
-    job_type: str
-    job_status: str
-
-    job_stage: Optional[str]
-    job_progress: Optional[str]              # ← STRING
-    job_progress_percent: Optional[int]       # ← INT
-    job_eta_seconds: Optional[int]
-
-    created_at: datetime
-    started_at: Optional[datetime]
-    completed_at: Optional[datetime]
+    report_type: str
+    report_generated_at: datetime
+    download_url: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True

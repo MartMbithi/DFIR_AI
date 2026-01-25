@@ -64,24 +64,26 @@
 #
 #
 
+import os
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
+from fastapi.responses import FileResponse
 from backend.db.session import get_db
 from backend.deps import get_current_user
 from backend.models.reports import Report
 from backend.models.cases import Case
+from backend.schemas.reports import ReportResponse
+from backend.models.users import User
 
 router = APIRouter(prefix="/reports", tags=["Reports"])
 
-
-@router.get("/case/{case_id}")
-def list_case_reports(
+@router.get("/case/{case_id}", response_model=list[ReportResponse])
+def get_reports_for_case(
     case_id: str,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
-    # Ensure case belongs to org
+    # 1️⃣ Enforce org boundary via case
     case = db.query(Case).filter(
         Case.case_id == case_id,
         Case.organization_id == current_user.organization_id
@@ -90,16 +92,43 @@ def list_case_reports(
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
 
+    # 2️⃣ Fetch reports (NO org filter here)
     reports = db.query(Report).filter(
         Report.case_id == case_id
     ).order_by(Report.report_generated_at.desc()).all()
 
+    # 3️⃣ Map to response with download URLs
     return [
-        {
-            "report_id": r.report_id,
-            "report_type": r.report_type,
-            "report_generated_at": r.report_generated_at,
-            "download_url": f"/reports/{r.report_id}/download"
-        }
+        ReportResponse(
+            report_id=r.report_id,
+            case_id=r.case_id,
+            report_type=r.report_type,
+            report_generated_at=r.report_generated_at,
+            download_url=f"/reports/{r.report_id}/download"
+        )
         for r in reports
     ]
+
+
+@router.get("/{report_id}/download")
+def download_report(
+    report_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    report = db.query(Report).join(Case).filter(
+        Report.report_id == report_id,
+        Case.organization_id == current_user.organization_id
+    ).first()
+
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    if not os.path.isfile(report.report_path):
+        raise HTTPException(status_code=410, detail="Report file missing")
+
+    return FileResponse(
+        path=report.report_path,
+        media_type="application/pdf",
+        filename=os.path.basename(report.report_path),
+    )
