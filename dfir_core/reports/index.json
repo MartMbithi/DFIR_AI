@@ -1,20 +1,8 @@
 [
   {
-    "case_id": "42de4a41",
-    "report_path": "reports/42de4a41_20260124_124935_dfir_full_report.pdf",
+    "case_id": "08abbb43",
+    "report_path": "reports/08abbb43_20260125_074721_dfir_full_report.pdf",
     "intensity": "LOW",
-    "generated_at": "2026-01-24T12:49:35.870763+00:00"
-  },
-  {
-    "case_id": "b82d83eb",
-    "report_path": "reports/b82d83eb_20260124_125611_dfir_full_report.pdf",
-    "intensity": "LOW",
-    "generated_at": "2026-01-24T12:56:11.960963+00:00"
-  },
-  {
-    "case_id": "a76ed473",
-    "report_path": "reports/a76ed473_20260124_130712_dfir_full_report.pdf",
-    "intensity": "LOW",
-    "generated_at": "2026-01-24T13:07:12.894708+00:00"
+    "generated_at": "2026-01-25T07:47:21.731650+00:00"
   }
 ]

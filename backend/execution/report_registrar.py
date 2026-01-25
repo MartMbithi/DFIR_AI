@@ -63,50 +63,55 @@
 #   paid—if any. No drama, no big payouts, just pixels and code.
 #
 #
-
 import os
 import uuid
+from datetime import datetime
 from sqlalchemy.orm import Session
 from backend.models.reports import Report
 
 DFIR_REPORTS_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "dfir_core", "reports")
+    os.path.join(
+        os.path.dirname(__file__),
+        "..", "..", "dfir_core", "reports"
+    )
 )
 
 
 def register_latest_report(case_id: str, db: Session):
     """
-    Persist latest DFIR report into reports table.
+    Register the most recently generated DFIR report (PDF),
+    regardless of filename convention.
     """
 
     if not os.path.isdir(DFIR_REPORTS_DIR):
+        print("[REPORT] reports directory not found")
         return None
 
-    reports = [
-        f for f in os.listdir(DFIR_REPORTS_DIR)
-        if f.startswith(case_id) and f.lower().endswith(".pdf")
+    pdfs = [
+        os.path.join(DFIR_REPORTS_DIR, f)
+        for f in os.listdir(DFIR_REPORTS_DIR)
+        if f.lower().endswith(".pdf")
     ]
 
-    if not reports:
+    if not pdfs:
+        print("[REPORT] no PDF reports found")
         return None
 
-    reports.sort(
-        key=lambda f: os.path.getmtime(os.path.join(DFIR_REPORTS_DIR, f)),
-        reverse=True
-    )
-
-    filename = reports[0]
-    report_path = os.path.join(DFIR_REPORTS_DIR, filename)
+    # Pick most recent file
+    latest_pdf = max(pdfs, key=os.path.getmtime)
 
     report = Report(
         report_id=str(uuid.uuid4()),
         case_id=case_id,
         report_type="pdf",
-        report_path=report_path
+        report_path=latest_pdf,
+        report_generated_at=datetime.utcnow(),
     )
 
     db.add(report)
     db.commit()
     db.refresh(report)
 
+    print("[REPORT] inserted:", report.report_id)
     return report
+
