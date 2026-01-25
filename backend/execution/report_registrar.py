@@ -62,7 +62,8 @@
 #   And if you ever think you’ve got a claim, the most you’re getting out of us is the license fee you
 #   paid—if any. No drama, no big payouts, just pixels and code.
 #
-# import os
+
+import os
 import uuid
 from datetime import datetime
 from sqlalchemy.orm import Session
