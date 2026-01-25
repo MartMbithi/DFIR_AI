@@ -3,7 +3,7 @@
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#   
+#
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -67,43 +67,39 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-import os
-
 from backend.db.session import get_db
 from backend.deps import get_current_user
 from backend.models.reports import Report
+from backend.models.cases import Case
 
 router = APIRouter(prefix="/reports", tags=["Reports"])
 
 
-@router.get("/{case_id}")
+@router.get("/case/{case_id}")
 def list_case_reports(
     case_id: str,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
 ):
-    return db.query(Report).filter(
-        Report.case_id == case_id,
-        Report.organization_id == current_user.organization_id
-    ).all()
-
-
-@router.get("/download/{report_id}")
-def download_report(
-    report_id: str,
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
-):
-    report = db.query(Report).filter(
-        Report.report_id == report_id,
-        Report.organization_id == current_user.organization_id
+    # Ensure case belongs to org
+    case = db.query(Case).filter(
+        Case.case_id == case_id,
+        Case.organization_id == current_user.organization_id
     ).first()
 
-    if not report or not os.path.exists(report.report_path):
-        raise HTTPException(status_code=404, detail="Report not found")
+    if not case:
+        raise HTTPException(status_code=404, detail="Case not found")
 
-    return FileResponse(
-        path=report.report_path,
-        filename=os.path.basename(report.report_path),
-        media_type="application/pdf"
-    )
+    reports = db.query(Report).filter(
+        Report.case_id == case_id
+    ).order_by(Report.report_generated_at.desc()).all()
+
+    return [
+        {
+            "report_id": r.report_id,
+            "report_type": r.report_type,
+            "report_generated_at": r.report_generated_at,
+            "download_url": f"/reports/{r.report_id}/download"
+        }
+        for r in reports
+    ]
