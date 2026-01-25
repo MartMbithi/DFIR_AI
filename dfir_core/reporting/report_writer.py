@@ -89,7 +89,7 @@ MITRE_MAP = {
     "ACCESS_DENIED": ("T1110", "Brute Force / Credential Access"),
 }
 
-OUTPUT_DIR = "reports"
+OUTPUT_DIR = os.getenv("DFIR_REPORT_DIR", "reports")
 FONT_DIR = "reporting/fonts"
 FONT_NAME = "Jost"
 

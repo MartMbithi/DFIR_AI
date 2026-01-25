@@ -84,7 +84,13 @@ def execute_dfir_case(case_id: str):
         os.path.join("data", "cases", case_id, "uploads")
     )
 
+    # Case Isolations - Have Case Reports Stored Per Case
+    case_report_dir = os.path.join(dfir_core_root, "reports", case_id)
+    os.makedirs(case_report_dir, exist_ok=True)
+
     env = os.environ.copy()
+    env["PYTHONPATH"] = dfir_core_root
+    env["DFIR_REPORT_DIR"] = case_report_dir
     env["PYTHONPATH"] = dfir_core_root              # REQUIRED
     env["DFIR_INPUT_DIR"] = upload_dir              # 🔥 Phase 7.3 key
 

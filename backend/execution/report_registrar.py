@@ -70,51 +70,42 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from backend.models.reports import Report
 
-DFIR_REPORTS_DIR = os.path.abspath(
-    os.path.join(
-        os.path.dirname(__file__),
-        "..", "..", "dfir_core", "reports"
-    )
+DFIR_REPORTS_ROOT = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "dfir_core", "reports")
 )
 
 
 def register_latest_report(case_id: str, db: Session):
-    """
-    Insert latest DFIR-generated PDF into reports table.
-    """
+    case_dir = os.path.join(DFIR_REPORTS_ROOT, case_id)
 
-    if not os.path.isdir(DFIR_REPORTS_DIR):
-        print("[REPORT] reports directory not found")
+    if not os.path.isdir(case_dir):
+        print("[REPORT] case report directory not found:", case_dir)
         return None
 
-    candidates = [
-        f for f in os.listdir(DFIR_REPORTS_DIR)
-        if f.startswith(case_id) and f.lower().endswith(".pdf")
+    pdfs = [
+        os.path.join(case_dir, f)
+        for f in os.listdir(case_dir)
+        if f.lower().endswith(".pdf")
     ]
 
-    if not candidates:
-        print("[REPORT] no reports found for case:", case_id)
+    if not pdfs:
+        print("[REPORT] no PDFs found for case:", case_id)
         return None
 
-    # newest file wins
-    candidates.sort(
-        key=lambda f: os.path.getmtime(os.path.join(DFIR_REPORTS_DIR, f)),
-        reverse=True
-    )
-
-    report_path = os.path.join(DFIR_REPORTS_DIR, candidates[0])
+    latest_pdf = max(pdfs, key=os.path.getmtime)
 
     report = Report(
         report_id=str(uuid.uuid4()),
         case_id=case_id,
         report_type="pdf",
-        report_path=report_path,
+        report_path=latest_pdf,
         report_generated_at=datetime.utcnow(),
     )
 
     db.add(report)
-    db.commit()        # 🔒 HARD COMMIT
+    db.commit()
     db.refresh(report)
 
     print("[REPORT] inserted:", report.report_id)
     return report
+
