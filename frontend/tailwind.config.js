@@ -3,13 +3,22 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        navy: "#0F1419",
-        slate: "#1A1F2E",
-        electric: "#0080FF",
-        cyan: "#00D4FF",
-        light: "#E8EAED",
-        danger: "#EF4444",
-        warning: "#F59E0B",
+        /* ===== Core Brand ===== */
+        nav: "#0A0E27", // Primary navigation background
+        primary: "#4B7BFF", // Primary CTA / links
+        primaryHover: "#3A66E5",
+
+        /* ===== Surfaces ===== */
+        card: "#1D2438", // Cards / panels
+        background: "#0A0E27", // App background
+
+        /* ===== Semantic ===== */
+        alert: "#B84C3C", // Alerts / critical
+        success: "#2EAD6A", // Success / safe
+
+        /* ===== Text ===== */
+        textPrimary: "#F5F6F8", // Text on dark
+        textInverse: "#0A0E27", // Text on light
       },
       fontFamily: {
         sans: ["NeueMachina", "system-ui", "sans-serif"],
