@@ -68,6 +68,7 @@ import os
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.responses import FileResponse
+
 from backend.db.session import get_db
 from backend.deps import get_current_user
 from backend.models.reports import Report
@@ -76,6 +77,7 @@ from backend.schemas.reports import ReportResponse
 from backend.models.users import User
 
 router = APIRouter(prefix="/reports", tags=["Reports"])
+
 
 @router.get("/case/{case_id}", response_model=list[ReportResponse])
 def get_reports_for_case(
@@ -116,16 +118,30 @@ def download_report(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    report = db.query(Report).join(Case).filter(
-        Report.report_id == report_id,
-        Case.organization_id == current_user.organization_id
-    ).first()
+    """
+    Download a generated forensic report.
+    Enforces:
+    - Authentication
+    - Organization isolation
+    - Case ownership
+    """
+
+    report = (
+        db.query(Report)
+        .join(Case, Case.case_id == Report.case_id)
+        .filter(
+            Report.report_id == report_id,
+            Case.organization_id == current_user.organization_id,
+        )
+        .first()
+    )
 
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
 
-    if not os.path.isfile(report.report_path):
-        raise HTTPException(status_code=410, detail="Report file missing")
+    if not report.report_path or not os.path.isfile(report.report_path):
+        raise HTTPException(
+            status_code=410, detail="Report file missing from storage")
 
     return FileResponse(
         path=report.report_path,
