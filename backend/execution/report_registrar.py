@@ -3,7 +3,7 @@
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#   
+#
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -62,42 +62,34 @@
 #   And if you ever think you’ve got a claim, the most you’re getting out of us is the license fee you
 #   paid—if any. No drama, no big payouts, just pixels and code.
 #
-#
-import os
+# import os
 import uuid
 from datetime import datetime
 from sqlalchemy.orm import Session
 from backend.models.reports import Report
 
-DFIR_REPORTS_DIR = os.path.abspath(
-    os.path.join(
-        os.path.dirname(__file__),
-        "..", "..", "dfir_core", "reports"
-    )
+DFIR_REPORTS_ROOT = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "dfir_core", "reports")
 )
 
 
 def register_latest_report(case_id: str, db: Session):
-    """
-    Register the most recently generated DFIR report (PDF),
-    regardless of filename convention.
-    """
+    case_dir = os.path.join(DFIR_REPORTS_ROOT, case_id)
 
-    if not os.path.isdir(DFIR_REPORTS_DIR):
-        print("[REPORT] reports directory not found")
+    if not os.path.isdir(case_dir):
+        print("[REPORT] case report directory not found:", case_dir)
         return None
 
     pdfs = [
-        os.path.join(DFIR_REPORTS_DIR, f)
-        for f in os.listdir(DFIR_REPORTS_DIR)
+        os.path.join(case_dir, f)
+        for f in os.listdir(case_dir)
         if f.lower().endswith(".pdf")
     ]
 
     if not pdfs:
-        print("[REPORT] no PDF reports found")
+        print("[REPORT] no PDFs found for case:", case_id)
         return None
 
-    # Pick most recent file
     latest_pdf = max(pdfs, key=os.path.getmtime)
 
     report = Report(
@@ -114,4 +106,3 @@ def register_latest_report(case_id: str, db: Session):
 
     print("[REPORT] inserted:", report.report_id)
     return report
-

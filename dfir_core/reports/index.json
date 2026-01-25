@@ -4,5 +4,11 @@
     "report_path": "reports/08abbb43_20260125_074721_dfir_full_report.pdf",
     "intensity": "LOW",
     "generated_at": "2026-01-25T07:47:21.731650+00:00"
+  },
+  {
+    "case_id": "83b17977",
+    "report_path": "reports/83b17977_20260125_080442_dfir_full_report.pdf",
+    "intensity": "LOW",
+    "generated_at": "2026-01-25T08:04:42.848422+00:00"
   }
 ]
