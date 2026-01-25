@@ -20,15 +20,23 @@ export default function Nav() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex gap-8 text-sm uppercase tracking-wide text-textPrimary">
-          <Link href="/platform" className="hover:text-primary">Platform</Link>
-          <Link href="/use-cases" className="hover:text-primary">Use Cases</Link>
-          <Link href="/research" className="hover:text-primary">Research</Link>
-          <Link href="/compliance" className="hover:text-primary">Compliance</Link>
+          <Link href="/platform" className="hover:text-primary transition">
+            Platform
+          </Link>
+          <Link href="/use-cases" className="hover:text-primary transition">
+            Use Cases
+          </Link>
+          <Link href="/research" className="hover:text-primary transition">
+            Research
+          </Link>
+          <Link href="/compliance" className="hover:text-primary transition">
+            Compliance
+          </Link>
         </nav>
 
         {/* Desktop CTA */}
         <Link
-          href="/#demo"
+          href="/platform"
           className="hidden md:inline-block px-5 py-2 bg-primary rounded font-semibold text-textInverse hover:bg-primaryHover transition"
         >
           Request Demo
@@ -50,13 +58,21 @@ export default function Nav() {
       {open && (
         <div className="md:hidden bg-nav border-t border-black/10">
           <nav className="flex flex-col px-6 py-4 gap-4 text-sm uppercase text-textPrimary">
-            <Link href="/platform" onClick={() => setOpen(false)}>Platform</Link>
-            <Link href="/use-cases" onClick={() => setOpen(false)}>Use Cases</Link>
-            <Link href="/research" onClick={() => setOpen(false)}>Research</Link>
-            <Link href="/compliance" onClick={() => setOpen(false)}>Compliance</Link>
+            <Link href="/platform" onClick={() => setOpen(false)}>
+              Platform
+            </Link>
+            <Link href="/use-cases" onClick={() => setOpen(false)}>
+              Use Cases
+            </Link>
+            <Link href="/research" onClick={() => setOpen(false)}>
+              Research
+            </Link>
+            <Link href="/compliance" onClick={() => setOpen(false)}>
+              Compliance
+            </Link>
 
             <Link
-              href="/#demo"
+              href="/platform"
               onClick={() => setOpen(false)}
               className="mt-4 px-4 py-2 bg-primary rounded text-textInverse text-center"
             >
