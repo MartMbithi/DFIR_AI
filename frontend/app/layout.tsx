@@ -1,12 +1,11 @@
-export const metadata = {
-  title: "DFIR-AI | Enterprise DFIR SaaS",
-  description: "AI-powered Digital Forensics & Incident Response platform built for modern SOCs"
-};
+import './globals.css';
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="font-sans bg-navy text-white antialiased">
+        {children}
+      </body>
     </html>
   );
 }

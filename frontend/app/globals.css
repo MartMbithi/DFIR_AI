@@ -1,8 +1,45 @@
+@font-face {
+  font-family: "NeueMachina";
+  src: url("/fonts/NeueMachina-Light.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "NeueMachina";
+  src: url("/fonts/NeueMachina-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "NeueMachina";
+  src: url("/fonts/NeueMachina-Ultrabold.otf") format("opentype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-primary: #0f1419;
+}
+
+html,
 body {
-  background: #020617;
-  color: #e5e7eb;
+  background: var(--bg-primary);
+  color: #ffffff;
+}
+
+section {
+  @apply py-24;
+}
+
+.container {
+  @apply max-w-[1440px] mx-auto px-20;
 }
