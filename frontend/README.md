@@ -1,16 +1,9 @@
-# DFIR-AI Frontend
+# DFIR-AI SaaS Marketing Site
 
-This is the frontend scaffold for the DFIR-AI SaaS platform.
+## Purpose
+Public-facing marketing site for DFIR-AI before authentication.
 
-## Stack
-- Next.js (React)
-- TypeScript
-- Tailwind CSS
-- TanStack Query
-- Zustand
-- Zod
-
-## Running Locally
+## Run
 ```bash
 npm install
 npm run dev
