@@ -21,6 +21,27 @@
   font-style: normal;
   font-display: swap;
 }
+:root {
+  --color-nav: #0a0e27;
+  --color-bg: #0a0e27;
+  --color-card: #1d2438;
+  --color-primary: #4b7bff;
+  --color-primary-hover: #3a66e5;
+  --color-text: #f5f6f8;
+  --color-text-inverse: #0a0e27;
+  --color-alert: #b84c3c;
+  --color-success: #2ead6a;
+}
+
+[data-theme="light"] {
+  --color-nav: #f5f6f8;
+  --color-bg: #ffffff;
+  --color-card: #f1f3f6;
+  --color-primary: #4b7bff;
+  --color-primary-hover: #3a66e5;
+  --color-text: #0a0e27;
+  --color-text-inverse: #ffffff;
+}
 
 @tailwind base;
 @tailwind components;
