@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Footer() {
   return (
     <footer className="bg-card border-t border-black/10">
@@ -22,20 +24,30 @@ export default function Footer() {
         {/* Column 2 */}
         <div>
           <h5 className="font-semibold mb-3">Platform</h5>
-          <p className="text-textMuted leading-6">
-            Platform<br />
-            Use Cases<br />
-            Research
-          </p>
+          <div className="text-textMuted leading-6 flex flex-col gap-1">
+            <Link href="/platform" className="hover:text-primary">
+              Platform
+            </Link>
+            <Link href="/use-cases" className="hover:text-primary">
+              Use Cases
+            </Link>
+            <Link href="/research" className="hover:text-primary">
+              Research
+            </Link>
+          </div>
         </div>
 
         {/* Column 3 */}
         <div>
           <h5 className="font-semibold mb-3">Legal</h5>
-          <p className="text-textMuted leading-6">
-            Privacy Policy<br />
-            Terms of Service
-          </p>
+          <div className="text-textMuted leading-6 flex flex-col gap-1">
+            <Link href="/legal/privacy" className="hover:text-primary">
+              Privacy Policy
+            </Link>
+            <Link href="/legal/terms" className="hover:text-primary">
+              Terms of Service
+            </Link>
+          </div>
         </div>
 
         {/* Column 4 */}
@@ -46,6 +58,7 @@ export default function Footer() {
             <a
               href="https://devlan.co.ke"
               target="_blank"
+              rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
               devlan.co.ke

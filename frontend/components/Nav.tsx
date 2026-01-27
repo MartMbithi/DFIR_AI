@@ -42,7 +42,7 @@ export default function Nav() {
 
         {/* Desktop CTA */}
         <Link
-          href="/platform"
+          href="/auth/request-demo"
           className="hidden md:inline-block px-5 py-2 bg-primary rounded font-semibold text-textInverse hover:bg-primaryHover transition"
         >
           Request Demo
