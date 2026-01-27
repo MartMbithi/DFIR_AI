@@ -19,9 +19,8 @@ export default function RequestDemo() {
                 method: 'POST',
                 body: JSON.stringify({ email })
             });
-
             setSent(true);
-        } catch (err: any) {
+        } catch {
             setError('Unable to submit request. Please try again.');
         }
     }
@@ -30,36 +29,78 @@ export default function RequestDemo() {
         <>
             <Nav />
 
-            <main className="pt-16 bg-background text-textPrimary">
-                <section className="container py-24 max-w-md">
-                    <h1 className="text-3xl font-extrabold mb-6">
-                        Request a Demo
-                    </h1>
+            <main className="pt-16 bg-background text-textPrimary min-h-screen flex items-center">
+                <section className="container px-4 flex justify-center">
+                    <div className="w-full max-w-md">
 
-                    {!sent ? (
-                        <form onSubmit={submit} className="space-y-6">
-                            <input
-                                type="email"
-                                required
-                                placeholder="work@company.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full p-3 rounded bg-card border border-black/10"
-                            />
+                        {/* Card */}
+                        <div className="bg-card border border-black/10 rounded-xl p-8 shadow-sm">
+                            <h1 className="text-3xl font-extrabold mb-2">
+                                Request a Demo
+                            </h1>
 
-                            <button className="w-full bg-primary py-3 rounded font-semibold text-textInverse">
-                                Continue
-                            </button>
+                            <p className="text-sm text-textMuted mb-8">
+                                Get access to DFIR-AI and see how modern teams investigate
+                                incidents with speed and integrity.
+                            </p>
 
-                            {error && (
-                                <p className="text-sm text-alert">{error}</p>
+                            {!sent ? (
+                                <form onSubmit={submit} className="space-y-6">
+
+                                    {/* Email */}
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">
+                                            Work Email
+                                        </label>
+                                        <input
+                                            type="email"
+                                            required
+                                            placeholder="you@company.com"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            className="
+                        w-full
+                        px-4 py-3
+                        rounded-lg
+                        bg-background
+                        border border-black/10
+                        focus:outline-none
+                        focus:ring-2 focus:ring-primary
+                      "
+                                        />
+                                    </div>
+
+                                    {/* CTA */}
+                                    <button
+                                        type="submit"
+                                        className="
+                      w-full
+                      py-3
+                      rounded-lg
+                      bg-primary
+                      font-semibold
+                      text-textInverse
+                      hover:bg-primaryHover
+                      transition
+                    "
+                                    >
+                                        Continue
+                                    </button>
+
+                                    {error && (
+                                        <p className="text-sm text-alert text-center">
+                                            {error}
+                                        </p>
+                                    )}
+                                </form>
+                            ) : (
+                                <p className="text-textMuted text-sm">
+                                    Thanks — check your email to complete account setup.
+                                </p>
                             )}
-                        </form>
-                    ) : (
-                        <p className="text-textMuted">
-                            Check your email to complete account setup.
-                        </p>
-                    )}
+                        </div>
+
+                    </div>
                 </section>
             </main>
 
