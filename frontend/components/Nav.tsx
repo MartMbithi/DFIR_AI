@@ -35,6 +35,9 @@ export default function Nav() {
           <Link href="/compliance" className="hover:text-primary transition">
             Compliance
           </Link>
+          <Link href="/self-hosted" className="hover:text-primary transition">
+            Self Hosted
+          </Link>
         </nav>
 
         {/* Desktop CTA */}
@@ -76,7 +79,9 @@ export default function Nav() {
             <Link href="/compliance" onClick={() => setOpen(false)}>
               Compliance
             </Link>
-
+            <Link href="/self-hosted" onClick={() => setOpen(false)}>
+              Self Hosted
+            </Link>
             <Link
               href="/platform"
               onClick={() => setOpen(false)}
