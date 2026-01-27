@@ -20,6 +20,9 @@ export default function Nav() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex gap-8 text-sm uppercase tracking-wide text-textPrimary">
+          <Link href="/" className="hover:text-primary transition">
+            Home
+          </Link>
           <Link href="/platform" className="hover:text-primary transition">
             Platform
           </Link>
@@ -58,6 +61,9 @@ export default function Nav() {
       {open && (
         <div className="md:hidden bg-nav border-t border-black/10">
           <nav className="flex flex-col px-6 py-4 gap-4 text-sm uppercase text-textPrimary">
+            <Link href="/" onClick={() => setOpen(false)}>
+              Home
+            </Link>
             <Link href="/platform" onClick={() => setOpen(false)}>
               Platform
             </Link>
