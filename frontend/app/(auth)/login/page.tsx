@@ -90,7 +90,7 @@ export default function Login() {
                 body: JSON.stringify({ email, password })
             });
 
-            //localStorage.setItem('token', data.access_token);
+            localStorage.setItem('token', data.access_token);
             try {
                 await apiFetch('/organizations/me');
                 router.push('/dashboard');
@@ -156,7 +156,7 @@ export default function Login() {
 
                             <p className="text-sm text-textMuted text-center mt-6">
                                 New to DFIR-AI?{' '}
-                                <a href="/auth/register" className="text-primary hover:underline">
+                                <a href="/register" className="text-primary hover:underline">
                                     Create an account
                                 </a>
                             </p>

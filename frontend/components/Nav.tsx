@@ -103,6 +103,9 @@ export default function Nav() {
           <Link href="/self-hosted" className="hover:text-primary transition">
             Self Hosted
           </Link>
+          <Link href="/login" className="hover:text-primary transition">
+            Login
+          </Link>
         </nav>
 
         {/* Desktop CTA */}
@@ -146,6 +149,9 @@ export default function Nav() {
             </Link>
             <Link href="/self-hosted" onClick={() => setOpen(false)}>
               Self Hosted
+            </Link>
+             <Link href="/login" onClick={() => setOpen(false)}>
+              Login
             </Link>
             <Link
               href="/register"

@@ -62,8 +62,7 @@
  *   And if you ever think you’ve got a claim, the most you’re getting out of us is the license fee you
  *   paid—if any. No drama, no big payouts, just pixels and code.
  *
- */
-'use client';
+ */'use client';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -85,3 +84,4 @@ export default function Dashboard() {
 
     return <div>Dashboard loading…</div>;
 }
+

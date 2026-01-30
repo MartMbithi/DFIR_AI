@@ -81,20 +81,26 @@ class LoginRequest(BaseModel):
 
 
 @router.post("/login")
-def login(
-    payload: LoginRequest,
-    db: Session = Depends(get_db)
-):
+def login(payload: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.user_email == payload.email).first()
 
     if not user or not verify_password(payload.password, user.user_password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    access_token = create_access_token(
-        data={"sub": user.user_id}
-    )
+    access_token = create_access_token(data={"sub": user.user_id})
 
-    return {
-        "access_token": access_token,
-        "token_type": "bearer"
-    }
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/logout", status_code=status.HTTP_200_OK)
+def logout():
+    """
+    Token-based logout.
+
+    For JWT-in-localStorage setups, logout is handled client-side
+    by deleting the token. This endpoint exists for:
+    - audit logging (future)
+    - symmetry with frontend
+    - extensibility (blacklists later)
+    """
+    return {"status": "logged_out"}
