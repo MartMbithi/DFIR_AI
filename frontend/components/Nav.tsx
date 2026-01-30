@@ -42,7 +42,7 @@ export default function Nav() {
 
         {/* Desktop CTA */}
         <Link
-          href="/auth/request-demo"
+          href="/auth/register"
           className="hidden md:inline-block px-5 py-2 bg-primary rounded font-semibold text-textInverse hover:bg-primaryHover transition"
         >
           Request Demo
@@ -83,7 +83,7 @@ export default function Nav() {
               Self Hosted
             </Link>
             <Link
-              href="/platform"
+              href="/register"
               onClick={() => setOpen(false)}
               className="mt-4 px-4 py-2 bg-primary rounded text-textInverse text-center"
             >
