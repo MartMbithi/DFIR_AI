@@ -26,7 +26,12 @@ export default function Login() {
             });
 
             localStorage.setItem('token', data.access_token);
-            router.push('/dashboard');
+            try {
+                await apiFetch('/organizations/me');
+                router.push('/dashboard');
+            } catch {
+                router.push('/onboarding/organization');
+            }
         } catch {
             setError('Invalid email or password.');
         } finally {
