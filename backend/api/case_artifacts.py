@@ -3,7 +3,7 @@
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#   
+#
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -124,3 +124,86 @@ def upload_case_artifact(
         "stored_path": stored_path,
         "case_id": case_id,
     }
+
+
+@router.get("/{case_id}/uploads")
+def list_case_uploads(
+    case_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    uploads = (
+        db.query(CaseUpload)
+        .filter(
+            CaseUpload.case_id == case_id,
+            CaseUpload.organization_id == current_user.organization_id,
+        )
+        .order_by(CaseUpload.uploaded_at.desc())
+        .all()
+    )
+
+    return uploads
+
+
+import os
+
+
+@router.delete("/uploads/{upload_id}")
+def delete_case_upload(
+    upload_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    upload = (
+        db.query(CaseUpload)
+        .filter(
+            CaseUpload.upload_id == upload_id,
+            CaseUpload.organization_id == current_user.organization_id,
+        )
+        .first()
+    )
+
+    if not upload:
+        raise HTTPException(status_code=404, detail="Upload not found")
+
+    # Optional: delete physical file
+    if upload.upload_path and os.path.exists(upload.upload_path):
+        os.remove(upload.upload_path)
+
+    db.delete(upload)
+    db.commit()
+
+    return {"status": "deleted"}
+
+
+from pydantic import BaseModel
+
+
+class UploadUpdate(BaseModel):
+    upload_filename: str | None = None
+
+
+@router.put("/uploads/{upload_id}")
+def update_case_upload(
+    upload_id: str,
+    payload: UploadUpdate,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    upload = (
+        db.query(CaseUpload)
+        .filter(
+            CaseUpload.upload_id == upload_id,
+            CaseUpload.organization_id == current_user.organization_id,
+        )
+        .first()
+    )
+
+    if not upload:
+        raise HTTPException(status_code=404, detail="Upload not found")
+
+    if payload.upload_filename:
+        upload.upload_filename = payload.upload_filename
+
+    db.commit()
+    return upload
