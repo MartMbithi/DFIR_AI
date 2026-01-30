@@ -4,5 +4,11 @@
     "report_path": "D:\\Projects\\Masters Type SHit\\Topic 1\\DFIR_AI\\dfir_core\\reports\\75ce2f76-1524-4969-a674-130e177cb865/feac2a9f_20260125_091249_dfir_full_report.pdf",
     "intensity": "LOW",
     "generated_at": "2026-01-25T09:12:49.549396+00:00"
+  },
+  {
+    "case_id": "4403b7fe",
+    "report_path": "D:\\Projects\\Masters Type SHit\\Topic 1\\DFIR_AI\\dfir_core\\reports\\10a81262-bd6f-4155-a55f-bb769ebfc494/4403b7fe_20260130_175733_dfir_full_report.pdf",
+    "intensity": "LOW",
+    "generated_at": "2026-01-30T17:57:33.511442+00:00"
   }
 ]
