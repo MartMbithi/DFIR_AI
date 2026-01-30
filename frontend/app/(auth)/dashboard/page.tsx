@@ -62,26 +62,178 @@
  *   And if you ever think you’ve got a claim, the most you’re getting out of us is the license fee you
  *   paid—if any. No drama, no big payouts, just pixels and code.
  *
- */'use client';
+ */
 
-import { useEffect } from 'react';
+'use client';
+
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import AuthNav from '@/components/AuthNav';
+import AuthGuard from '@/components/AuthGuard';
 import { apiFetch } from '@/lib/api';
+
+type Case = {
+    case_id: string;
+    case_name: string;
+};
+
+type Job = {
+    job_id: string;
+    job_status: string;
+};
 
 export default function Dashboard() {
     const router = useRouter();
 
+    const [orgName, setOrgName] = useState('');
+    const [cases, setCases] = useState<Case[]>([]);
+    const [jobs, setJobs] = useState<Job[]>([]);
+    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
-        async function check() {
+        async function load() {
             try {
-                await apiFetch('/organizations/me');
-            } catch {
+                const org = await apiFetch('/organizations/me');
+                setOrgName(org.organization_name);
+
+                const casesData = await apiFetch('/cases/');
+                setCases(casesData);
+
+                const jobsData = await apiFetch('/jobs/');
+                setJobs(jobsData);
+            } catch (err) {
                 router.replace('/onboarding/organization');
+            } finally {
+                setLoading(false);
             }
         }
-        check();
+
+        load();
     }, []);
 
-    return <div>Dashboard loading…</div>;
+    if (loading) {
+        return <div className="p-8">Loading dashboard…</div>;
+    }
+
+    const activeJobs = jobs.filter(j => j.job_status === 'running').length;
+    const completedJobs = jobs.filter(j => j.job_status === 'completed').length;
+
+    return (
+        <AuthGuard>
+            <AuthNav />
+
+            <main className="container py-10 space-y-10">
+
+                {/* ORG HEADER */}
+                <section>
+                    <h1 className="text-2xl font-bold">
+                        {orgName}
+                    </h1>
+                    <p className="text-sm text-gray-600">
+                        Organization security overview
+                    </p>
+                </section>
+
+                {/* STATS */}
+                <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <StatCard
+                        title="Cases"
+                        value={cases.length}
+                        hint="Active investigations"
+                    />
+                    <StatCard
+                        title="Active Jobs"
+                        value={activeJobs}
+                        hint="Currently processing"
+                    />
+                    <StatCard
+                        title="Completed Jobs"
+                        value={completedJobs}
+                        hint="Analysis completed"
+                    />
+                    <StatCard
+                        title="Artifacts"
+                        value="—"
+                        hint="Ingested evidence"
+                    />
+                </section>
+
+                {/* ACTIVITY */}
+                <section className="bg-gray-50 border rounded p-6">
+                    <h2 className="font-semibold mb-2">System Activity</h2>
+
+                    {activeJobs > 0 ? (
+                        <p className="text-sm text-green-700">
+                            {activeJobs} job{activeJobs > 1 && 's'} currently running
+                        </p>
+                    ) : (
+                        <p className="text-sm text-gray-600">
+                            No active jobs running
+                        </p>
+                    )}
+                </section>
+
+                {/* QUICK ACTIONS */}
+                <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <ActionCard
+                        title="Create Case"
+                        description="Start a new investigation"
+                        onClick={() => router.push('/cases')}
+                    />
+                    <ActionCard
+                        title="Upload Evidence"
+                        description="Add forensic artifacts"
+                        onClick={() => router.push('/cases')}
+                    />
+                    <ActionCard
+                        title="View Reports"
+                        description="Access generated reports"
+                        onClick={() => router.push('/reports')}
+                    />
+                </section>
+
+            </main>
+        </AuthGuard>
+    );
+}
+
+/* ---------- Components ---------- */
+
+function StatCard({
+    title,
+    value,
+    hint
+}: {
+    title: string;
+    value: number | string;
+    hint: string;
+}) {
+    return (
+        <div className="border rounded p-6">
+            <p className="text-sm text-gray-500">{title}</p>
+            <p className="text-3xl font-bold">{value}</p>
+            <p className="text-xs text-gray-500 mt-1">{hint}</p>
+        </div>
+    );
+}
+
+function ActionCard({
+    title,
+    description,
+    onClick
+}: {
+    title: string;
+    description: string;
+    onClick: () => void;
+}) {
+    return (
+        <button
+            onClick={onClick}
+            className="border rounded p-6 text-left hover:border-black transition"
+        >
+            <h3 className="font-semibold">{title}</h3>
+            <p className="text-sm text-gray-600 mt-1">{description}</p>
+        </button>
+    );
 }
 
