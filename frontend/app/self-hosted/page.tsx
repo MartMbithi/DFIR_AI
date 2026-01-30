@@ -134,7 +134,7 @@ export default function SelfHosted() {
                             </p>
 
                             <a
-                                href="/platform"
+                                href="/register"
                                 className="inline-block px-5 py-3 bg-primary rounded-lg
                            font-semibold text-textInverse hover:bg-primaryHover transition"
                             >

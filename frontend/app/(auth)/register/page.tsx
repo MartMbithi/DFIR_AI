@@ -29,7 +29,7 @@ export default function Register() {
             });
 
             // After successful signup → login
-            router.push('/auth/login');
+            router.push('/login');
         } catch (err: any) {
             setError('Account creation failed. Email may already exist.');
             
