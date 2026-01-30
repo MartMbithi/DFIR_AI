@@ -90,7 +90,7 @@ export default function Login() {
                 body: JSON.stringify({ email, password })
             });
 
-            localStorage.setItem('token', data.access_token);
+            //localStorage.setItem('token', data.access_token);
             try {
                 await apiFetch('/organizations/me');
                 router.push('/dashboard');

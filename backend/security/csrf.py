@@ -1,9 +1,9 @@
 #
-#   Crafted On Mon Jan 12 2026
+#   Crafted On Fri Jan 30 2026
 #   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
 #   fluctuations, signal interference, or doubt—it can only be
 #   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
-#
+#   
 #   www.devlan.co.ke
 #   hello@devlan.co.ke
 #
@@ -63,91 +63,11 @@
 #   paid—if any. No drama, no big payouts, just pixels and code.
 #
 #
+from fastapi import Request, HTTPException
 
-from fastapi import APIRouter, Depends, HTTPException, status, Response
-from sqlalchemy.orm import Session
-from pydantic import BaseModel, EmailStr
-from datetime import timedelta
-import secrets
+def verify_csrf(request: Request):
+    csrf_cookie = request.cookies.get("csrf_token")
+    csrf_header = request.headers.get("X-CSRF-Token")
 
-from backend.db.session import get_db
-from backend.models.users import User
-from backend.security import verify_password, create_access_token
-
-router = APIRouter(prefix="/auth", tags=["Auth"])
-
-
-class LoginRequest(BaseModel):
-    email: EmailStr
-    password: str
-
-
-@router.post(
-    "/login",
-    status_code=status.HTTP_200_OK,
-)
-def login(
-    payload: LoginRequest,
-    response: Response,
-    db: Session = Depends(get_db)
-):
-    """
-    Secure login endpoint.
-
-    - Verifies user credentials
-    - Issues JWT as HttpOnly cookie
-    - Issues CSRF token (double-submit pattern)
-    - Does NOT expose tokens to JavaScript
-    """
-
-    user = (
-        db.query(User)
-        .filter(User.user_email == payload.email)
-        .first()
-    )
-
-    if not user or not verify_password(
-        payload.password,
-        user.user_password_hash
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials"
-        )
-
-    # --- Create access token ---
-    access_token = create_access_token(
-        data={"sub": str(user.user_id)},
-        expires_delta=timedelta(minutes=30)
-    )
-
-    # --- Create CSRF token ---
-    csrf_token = secrets.token_urlsafe(32)
-
-    # --- Set access token cookie (HttpOnly) ---
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        httponly=True,
-        secure=True,          # MUST be True in prod (HTTPS)
-        samesite="strict",
-        max_age=1800,
-        path="/"
-    )
-
-    # --- Set CSRF cookie (readable by JS) ---
-    response.set_cookie(
-        key="csrf_token",
-        value=csrf_token,
-        httponly=False,       # Required for double-submit
-        secure=False,
-        samesite="strict",
-        max_age=1800,
-        path="/"
-    )
-
-    return {
-        "status": "authenticated",
-        "user_id": user.user_id
-    }
-
+    if not csrf_cookie or csrf_cookie != csrf_header:
+        raise HTTPException(status_code=403, detail="CSRF validation failed")
