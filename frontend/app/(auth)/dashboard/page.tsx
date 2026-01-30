@@ -63,7 +63,6 @@
  *   paid—if any. No drama, no big payouts, just pixels and code.
  *
  */
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -101,7 +100,7 @@ export default function Dashboard() {
 
                 const jobsData = await apiFetch('/jobs/');
                 setJobs(jobsData);
-            } catch (err) {
+            } catch {
                 router.replace('/onboarding/organization');
             } finally {
                 setLoading(false);
@@ -122,74 +121,82 @@ export default function Dashboard() {
         <AuthGuard>
             <AuthNav />
 
-            <main className="container py-10 space-y-10">
+            <main className="container py-1 space-y-1">
 
-                {/* ORG HEADER */}
-                <section>
-                    <h1 className="text-2xl font-bold">
+                {/* ===== ORG HEADER ===== */}
+                <section className="space-y-2">
+                    <h1 className="text-2xl font-extrabold">
                         {orgName}
                     </h1>
-                    <p className="text-sm text-gray-600">
-                        Organization security overview
+                    <p className="text-sm text-textMuted">
+                        Organization-level DFIR operational overview
                     </p>
                 </section>
 
-                {/* STATS */}
+                {/* ===== STAT GRID ===== */}
                 <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <StatCard
                         title="Cases"
                         value={cases.length}
-                        hint="Active investigations"
+                        hint="Investigations under management"
+                        accent="border-l-blue-500"
                     />
                     <StatCard
                         title="Active Jobs"
                         value={activeJobs}
-                        hint="Currently processing"
+                        hint="Currently processing evidence"
+                        accent="border-l-amber-500"
                     />
                     <StatCard
                         title="Completed Jobs"
                         value={completedJobs}
-                        hint="Analysis completed"
+                        hint="Analysis runs completed"
+                        accent="border-l-green-500"
                     />
                     <StatCard
                         title="Artifacts"
                         value="—"
-                        hint="Ingested evidence"
+                        hint="Evidence ingested (coming soon)"
+                        accent="border-l-gray-400"
                     />
                 </section>
 
-                {/* ACTIVITY */}
-                <section className="bg-gray-50 border rounded p-6">
-                    <h2 className="font-semibold mb-2">System Activity</h2>
+                {/* ===== ACTIVITY STRIP ===== */}
+                <section className="rounded-lg border bg-card p-6 space-y-2">
+                    <h2 className="font-semibold">System Activity</h2>
 
                     {activeJobs > 0 ? (
-                        <p className="text-sm text-green-700">
-                            {activeJobs} job{activeJobs > 1 && 's'} currently running
+                        <p className="text-sm text-amber-600">
+                            ⚙️ {activeJobs} job{activeJobs > 1 && 's'} currently running across cases
                         </p>
                     ) : (
-                        <p className="text-sm text-gray-600">
-                            No active jobs running
+                        <p className="text-sm text-textMuted">
+                            No active background processing at the moment
                         </p>
                     )}
                 </section>
 
-                {/* QUICK ACTIONS */}
-                <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <ActionCard
-                        title="Create Case"
-                        description="Start a new investigation"
-                        onClick={() => router.push('/cases')}
-                    />
-                    <ActionCard
-                        title="Upload Evidence"
-                        description="Add forensic artifacts"
-                        onClick={() => router.push('/cases')}
-                    />
-                    <ActionCard
-                        title="View Reports"
-                        description="Access generated reports"
-                        onClick={() => router.push('/reports')}
-                    />
+                {/* ===== QUICK ACTIONS ===== */}
+                <section className="space-y-4">
+                    <h2 className="font-semibold">Quick Actions</h2>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <ActionCard
+                            title="Create Case"
+                            description="Start a new forensic investigation"
+                            onClick={() => router.push('/cases')}
+                        />
+                        <ActionCard
+                            title="Upload Evidence"
+                            description="Attach artifacts to an existing case"
+                            onClick={() => router.push('/cases')}
+                        />
+                        <ActionCard
+                            title="View Reports"
+                            description="Access generated forensic reports"
+                            onClick={() => router.push('/reports')}
+                        />
+                    </div>
                 </section>
 
             </main>
@@ -202,17 +209,19 @@ export default function Dashboard() {
 function StatCard({
     title,
     value,
-    hint
+    hint,
+    accent
 }: {
     title: string;
     value: number | string;
     hint: string;
+    accent: string;
 }) {
     return (
-        <div className="border rounded p-6">
-            <p className="text-sm text-gray-500">{title}</p>
+        <div className={`border rounded p-6 border-l-4 ${accent}`}>
+            <p className="text-sm text-textMuted">{title}</p>
             <p className="text-3xl font-bold">{value}</p>
-            <p className="text-xs text-gray-500 mt-1">{hint}</p>
+            <p className="text-xs text-textMuted mt-1">{hint}</p>
         </div>
     );
 }
@@ -229,11 +238,17 @@ function ActionCard({
     return (
         <button
             onClick={onClick}
-            className="border rounded p-6 text-left hover:border-black transition"
+            className="
+        border rounded-lg p-6 text-left
+        hover:border-primary
+        hover:bg-card
+        transition
+      "
         >
             <h3 className="font-semibold">{title}</h3>
-            <p className="text-sm text-gray-600 mt-1">{description}</p>
+            <p className="text-sm text-textMuted mt-1">{description}</p>
         </button>
     );
 }
+
 
