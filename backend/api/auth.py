@@ -68,6 +68,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 from datetime import timedelta
+import os
 import secrets
 
 from backend.db.session import get_db
@@ -82,29 +83,15 @@ class LoginRequest(BaseModel):
     password: str
 
 
-@router.post(
-    "/login",
-    status_code=status.HTTP_200_OK,
-)
+@router.post("/login", status_code=status.HTTP_200_OK)
 def login(
     payload: LoginRequest,
     response: Response,
     db: Session = Depends(get_db)
 ):
-    """
-    Secure login endpoint.
-
-    - Verifies user credentials
-    - Issues JWT as HttpOnly cookie
-    - Issues CSRF token (double-submit pattern)
-    - Does NOT expose tokens to JavaScript
-    """
-
-    user = (
-        db.query(User)
-        .filter(User.user_email == payload.email)
-        .first()
-    )
+    user = db.query(User).filter(
+        User.user_email == payload.email
+    ).first()
 
     if not user or not verify_password(
         payload.password,
@@ -115,39 +102,30 @@ def login(
             detail="Invalid credentials"
         )
 
-    # --- Create access token ---
     access_token = create_access_token(
-        data={"sub": str(user.user_id)},
-        expires_delta=timedelta(minutes=30)
+        data={"sub": str(user.user_id)}
     )
 
-    # --- Create CSRF token ---
     csrf_token = secrets.token_urlsafe(32)
 
-    # --- Set access token cookie (HttpOnly) ---
     response.set_cookie(
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=True,          # MUST be True in prod (HTTPS)
-        samesite="strict",
+        secure=os.getenv("COOKIE_SECURE", "false").lower() == "true",
+        samesite=os.getenv("COOKIE_SAMESITE", "strict"),
         max_age=1800,
         path="/"
     )
 
-    # --- Set CSRF cookie (readable by JS) ---
     response.set_cookie(
         key="csrf_token",
         value=csrf_token,
-        httponly=False,       # Required for double-submit
-        secure=False,
-        samesite="strict",
+        httponly=False,
+        secure=os.getenv("COOKIE_SECURE", "false").lower() == "true",
+        samesite=os.getenv("COOKIE_SAMESITE", "strict"),
         max_age=1800,
         path="/"
     )
 
-    return {
-        "status": "authenticated",
-        "user_id": user.user_id
-    }
-
+    return {"status": "authenticated"}
