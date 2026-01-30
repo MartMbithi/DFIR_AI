@@ -64,18 +64,15 @@
 #
 #
 
-from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from pydantic import BaseModel, EmailStr
-from datetime import timedelta
-import os
-import secrets
-
 from backend.db.session import get_db
 from backend.models.users import User
 from backend.security import verify_password, create_access_token
+from pydantic import BaseModel, EmailStr
 
-router = APIRouter(prefix="/auth", tags=["Auth"])
+
+router = APIRouter()
 
 
 class LoginRequest(BaseModel):
@@ -83,49 +80,21 @@ class LoginRequest(BaseModel):
     password: str
 
 
-@router.post("/login", status_code=status.HTTP_200_OK)
+@router.post("/login")
 def login(
     payload: LoginRequest,
-    response: Response,
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(
-        User.user_email == payload.email
-    ).first()
+    user = db.query(User).filter(User.user_email == payload.email).first()
 
-    if not user or not verify_password(
-        payload.password,
-        user.user_password_hash
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials"
-        )
+    if not user or not verify_password(payload.password, user.user_password_hash):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
     access_token = create_access_token(
-        data={"sub": str(user.user_id)}
+        data={"sub": user.user_id}
     )
 
-    csrf_token = secrets.token_urlsafe(32)
-
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        httponly=True,
-        secure=os.getenv("COOKIE_SECURE", "false").lower() == "true",
-        samesite=os.getenv("COOKIE_SAMESITE", "strict"),
-        max_age=1800,
-        path="/"
-    )
-
-    response.set_cookie(
-        key="csrf_token",
-        value=csrf_token,
-        httponly=False,
-        secure=os.getenv("COOKIE_SECURE", "false").lower() == "true",
-        samesite=os.getenv("COOKIE_SAMESITE", "strict"),
-        max_age=1800,
-        path="/"
-    )
-
-    return {"status": "authenticated"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
