@@ -107,7 +107,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" data-bs-theme="dark">
       <head>
         {/* HUD THEME CSS (OFFLINE) */}
         <link rel="stylesheet" href="/assets/css/vendor.min.css" />
@@ -116,7 +116,7 @@ export default function RootLayout({
 
       <body>
         {/* HUD ROOT CONTAINER — REQUIRED */}
-        <div id="app" className="app">
+        <div id="app" className="app" >
           {children}
         </div>
 
