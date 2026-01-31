@@ -48,22 +48,12 @@ export default function Dashboard() {
             try {
                 const org = await apiFetch('/organizations/me');
                 setOrgName(org.organization_name);
-
-                // clear onboarding marker once confirmed
                 sessionStorage.removeItem('org_created');
-
                 setCases(await apiFetch('/cases/'));
                 setJobs(await apiFetch('/jobs/'));
                 /* setActivity(await apiFetch('/activity/stream'));
                 setStorage(await apiFetch('/metrics/storage')); */
             } catch {
-                const orgJustCreated = sessionStorage.getItem('org_created');
-
-                if (orgJustCreated) {
-                    // backend likely still committing org
-                    return;
-                }
-
                 router.replace('/onboarding/organization');
             } finally {
                 setLoading(false);
