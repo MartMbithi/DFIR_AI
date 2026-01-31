@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import AuthGuard from '@/components/AuthGuard';
-import AppSidebar from '@/components/AppSidebar';
+import DashboardLayout from '@/app/dashboard-layout';
 import { apiFetch } from '@/lib/api';
 
 /* ================= TYPES ================= */
@@ -30,9 +29,9 @@ type Storage = {
     total_gb: number;
 };
 
-/* ================= DASHBOARD ================= */
+/* ================= DASHBOARD PAGE ================= */
 
-export default function Dashboard() {
+export default function DashboardPage() {
     const router = useRouter();
 
     const [orgName, setOrgName] = useState('');
@@ -48,11 +47,13 @@ export default function Dashboard() {
             try {
                 const org = await apiFetch('/organizations/me');
                 setOrgName(org.organization_name);
-                sessionStorage.removeItem('org_created');
+
                 setCases(await apiFetch('/cases/'));
                 setJobs(await apiFetch('/jobs/'));
-                /* setActivity(await apiFetch('/activity/stream'));
-                setStorage(await apiFetch('/metrics/storage')); */
+
+                // Enable when endpoints are live
+                // setActivity(await apiFetch('/activity/stream'));
+                // setStorage(await apiFetch('/metrics/storage'));
             } catch {
                 router.replace('/onboarding/organization');
             } finally {
@@ -62,7 +63,6 @@ export default function Dashboard() {
 
         load();
     }, []);
-
 
     /* ---------- REAL-TIME JOB POLLING ---------- */
     useEffect(() => {
@@ -78,7 +78,7 @@ export default function Dashboard() {
     }, []);
 
     if (loading) {
-        return <div className="p-5">Loading DFIR environment…</div>;
+        return <div className="p-4">Loading DFIR environment…</div>;
     }
 
     const runningJobs = jobs.filter(j => j.job_status === 'running').length;
@@ -88,119 +88,112 @@ export default function Dashboard() {
         storage ? Math.round((storage.used_gb / storage.total_gb) * 100) : 0;
 
     return (
-        <AuthGuard>
-            <div id="app" className="app app-sidebar-fixed">
+        <DashboardLayout>
 
-                <AppSidebar />
+            {/* ================= HEADER ================= */}
+            <div className="row mb-4">
+                <div className="col">
+                    <h1 className="mb-1">{orgName}</h1>
+                    <p className="text-body text-opacity-75">
+                        Forensic operations & analytical state overview
+                    </p>
+                </div>
+            </div>
 
-                {/* ================= CONTENT ================= */}
-                <div id="content" className="app-content">
-                    <div className="container-fluid">
+            {/* ================= METRICS ================= */}
+            <div className="row g-3 mb-4">
+                <Metric title="Cases" value={cases.length} icon="bi-folder2-open" />
+                <Metric title="Active Jobs" value={runningJobs} icon="bi-cpu" />
+                <Metric title="Completed Jobs" value={completedJobs} icon="bi-check2-circle" />
+                <Metric
+                    title="Storage Used"
+                    value={`${storage?.used_gb ?? 0} GB`}
+                    icon="bi-database"
+                />
+            </div>
 
-                        {/* ===== HEADER ===== */}
-                        <div className="row mb-4">
-                            <div className="col">
-                                <h1 className="mb-1">{orgName}</h1>
-                                <p className="text-body text-opacity-75">
-                                    Forensic operations & analytical state overview
-                                </p>
+            {/* ================= TIMELINE + STORAGE ================= */}
+            <div className="row g-3 mb-4">
+
+                {/* TIMELINE HEATMAP */}
+                <div className="col-lg-8">
+                    <div className="card h-100">
+                        <div className="card-body">
+                            <h5>Investigation Timeline Activity</h5>
+                            <p className="small text-body text-opacity-75">
+                                Event density across cases (ingest, analysis, reporting)
+                            </p>
+
+                            <div className="mt-3">
+                                <div
+                                    id="timeline-heatmap"
+                                    className="ratio ratio-21x9 bg-body bg-opacity-25 rounded"
+                                ></div>
                             </div>
                         </div>
+                        <HudArrows />
+                    </div>
+                </div>
 
-                        {/* ===== METRICS ===== */}
-                        <div className="row g-3 mb-4">
-                            <Metric title="Cases" value={cases.length} icon="bi-folder2-open" />
-                            <Metric title="Active Jobs" value={runningJobs} icon="bi-cpu" />
-                            <Metric title="Completed Jobs" value={completedJobs} icon="bi-check2-circle" />
-                            <Metric
-                                title="Storage Used"
-                                value={`${storage?.used_gb ?? 0} GB`}
-                                icon="bi-database"
-                            />
+                {/* STORAGE */}
+                <div className="col-lg-4">
+                    <div className="card h-100">
+                        <div className="card-body">
+                            <h5>Evidence Storage</h5>
+
+                            <div className="mb-2">
+                                <strong>{storage?.used_gb ?? 0} GB</strong> of{' '}
+                                {storage?.total_gb ?? 0} GB used
+                            </div>
+
+                            <div className="progress h-5px">
+                                <div
+                                    className="progress-bar bg-theme"
+                                    style={{ width: `${storagePct}%` }}
+                                ></div>
+                            </div>
+
+                            <p className="small mt-2 text-body text-opacity-75">
+                                Disk images, memory captures, logs, extracted artifacts
+                            </p>
                         </div>
+                        <HudArrows />
+                    </div>
+                </div>
 
-                        {/* ===== TIMELINE + STORAGE ===== */}
-                        <div className="row g-3 mb-4">
+            </div>
 
-                            {/* TIMELINE HEATMAP */}
-                            <div className="col-lg-8">
-                                <div className="card h-100">
-                                    <div className="card-body">
-                                        <h5>Investigation Timeline Activity</h5>
-                                        <p className="small text-body text-opacity-75">
-                                            Event density across cases (ingest, analysis, reporting)
-                                        </p>
+            {/* ================= ACTIVITY STREAM ================= */}
+            <div className="row">
+                <div className="col-lg-12">
+                    <div className="card">
+                        <div className="card-body">
+                            <h5>Case & System Activity</h5>
 
-                                        <div className="mt-3">
-                                            <div id="timeline-heatmap" className="ratio ratio-21x9 bg-body bg-opacity-25 rounded"></div>
+                            <ul className="list-unstyled mt-3 mb-0">
+                                {activity.length === 0 && (
+                                    <li className="text-body text-opacity-50 small">
+                                        No recent activity
+                                    </li>
+                                )}
+
+                                {activity.slice(0, 10).map(a => (
+                                    <li key={a.id} className="mb-2 small">
+                                        <i className="bi bi-circle-fill text-theme fs-6px me-2"></i>
+                                        {a.message}
+                                        <div className="text-body text-opacity-50">
+                                            {new Date(a.timestamp).toLocaleString()}
                                         </div>
-                                    </div>
-                                    <HudArrows />
-                                </div>
-                            </div>
-
-                            {/* STORAGE UTILIZATION */}
-                            <div className="col-lg-4">
-                                <div className="card h-100">
-                                    <div className="card-body">
-                                        <h5>Evidence Storage</h5>
-
-                                        <div className="mb-2">
-                                            <strong>{storage?.used_gb ?? 0} GB</strong> of{' '}
-                                            {storage?.total_gb ?? 0} GB used
-                                        </div>
-
-                                        <div className="progress h-5px">
-                                            <div
-                                                className="progress-bar bg-theme"
-                                                style={{ width: `${storagePct}%` }}
-                                            ></div>
-                                        </div>
-
-                                        <p className="small mt-2 text-body text-opacity-75">
-                                            Includes disk images, memory dumps, logs, extracted artifacts
-                                        </p>
-                                    </div>
-                                    <HudArrows />
-                                </div>
-                            </div>
-
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
-
-                        {/* ===== ACTIVITY STREAM ===== */}
-                        <div className="row">
-                            <div className="col-lg-12">
-                                <div className="card">
-                                    <div className="card-body">
-                                        <h5>Case & System Activity</h5>
-
-                                        <ul className="list-unstyled mt-3 mb-0">
-                                            {activity.length === 0 && (
-                                                <li className="text-body text-opacity-50 small">
-                                                    No recent activity
-                                                </li>
-                                            )}
-
-                                            {activity.slice(0, 10).map(a => (
-                                                <li key={a.id} className="mb-2 small">
-                                                    <i className="bi bi-circle-fill text-theme fs-6px me-2"></i>
-                                                    {a.message}
-                                                    <div className="text-body text-opacity-50">
-                                                        {new Date(a.timestamp).toLocaleString()}
-                                                    </div>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                    <HudArrows />
-                                </div>
-                            </div>
-                        </div>
-
+                        <HudArrows />
                     </div>
                 </div>
             </div>
-        </AuthGuard>
+
+        </DashboardLayout>
     );
 }
 

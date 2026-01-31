@@ -1,69 +1,139 @@
+/*
+ *   Crafted On Fri Jan 30 2026
+ *   Devlan Solutions LTD — DFIR-AI
+ */
+
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useLogout } from '@/lib/useLogout';
-
-const items = [
-    { href: '/dashboard', icon: 'bi-speedometer2', label: 'Overview' },
-    { href: '/cases', icon: 'bi-folder2-open', label: 'Cases' },
-    { href: '/jobs', icon: 'bi-cpu', label: 'Analysis Jobs' },
-    { href: '/reports', icon: 'bi-file-earmark-text', label: 'Reports' },
-    { href: '/organization', icon: 'bi-buildings', label: 'Organization' },
-    { href: '/profile', icon: 'bi-person-circle', label: 'Profile' }
-];
 
 export default function AppSidebar() {
     const pathname = usePathname();
-    const logout = useLogout();
+
+    const isActive = (path: string) =>
+        pathname === path || pathname.startsWith(path + '/');
 
     return (
-        <div id="sidebar" className="app-sidebar">
-            <div className="app-sidebar-content" data-scrollbar="true">
+        <>
+            {/* BEGIN #sidebar */}
+            <div id="sidebar" className="app-sidebar">
+                <div
+                    className="app-sidebar-content"
+                    data-scrollbar="true"
+                    data-height="100%"
+                >
+                    <div className="menu">
 
-                {/* BRAND */}
-                <div className="menu px-3 py-3">
-                    <div className="fw-bold text-theme fs-5">
-                        DFIR-AI
-                    </div>
-                    <div className="small text-body text-opacity-50">
-                        Digital Forensics Platform
-                    </div>
-                </div>
+                        {/* ================= DFIR CORE ================= */}
+                        <div className="menu-header">DFIR Operations</div>
 
-                {/* NAV */}
-                <div className="menu">
-                    <div className="menu-header">Operations</div>
-
-                    {items.map(item => (
-                        <div
-                            key={item.href}
-                            className={`menu-item ${pathname.startsWith(item.href) ? 'active' : ''}`}
-                        >
-                            <Link href={item.href} className="menu-link">
+                        <div className={`menu-item ${isActive('/app') ? 'active' : ''}`}>
+                            <Link href="/app" className="menu-link">
                                 <span className="menu-icon">
-                                    <i className={`bi ${item.icon}`}></i>
+                                    <i className="bi bi-cpu"></i>
                                 </span>
-                                <span className="menu-text">{item.label}</span>
+                                <span className="menu-text">Operations Overview</span>
                             </Link>
                         </div>
-                    ))}
 
-                    <div className="menu-divider"></div>
+                        <div className={`menu-item ${isActive('/cases') ? 'active' : ''}`}>
+                            <Link href="/cases" className="menu-link">
+                                <span className="menu-icon">
+                                    <i className="bi bi-folder2-open"></i>
+                                </span>
+                                <span className="menu-text">Cases</span>
+                            </Link>
+                        </div>
 
-                    <div className="menu-header">Session</div>
+                        <div className={`menu-item ${isActive('/evidence') ? 'active' : ''}`}>
+                            <Link href="/evidence" className="menu-link">
+                                <span className="menu-icon">
+                                    <i className="bi bi-hdd-stack"></i>
+                                </span>
+                                <span className="menu-text">Evidence</span>
+                            </Link>
+                        </div>
 
-                    <div className="menu-item">
-                        <button onClick={logout} className="menu-link w-100 text-start">
-                            <span className="menu-icon">
-                                <i className="bi bi-box-arrow-right"></i>
-                            </span>
-                            <span className="menu-text text-danger">Logout</span>
-                        </button>
+                        <div className={`menu-item ${isActive('/jobs') ? 'active' : ''}`}>
+                            <Link href="/jobs" className="menu-link">
+                                <span className="menu-icon">
+                                    <i className="bi bi-cpu-fill"></i>
+                                </span>
+                                <span className="menu-text">Analysis Jobs</span>
+                            </Link>
+                        </div>
+
+                        <div className={`menu-item ${isActive('/timelines') ? 'active' : ''}`}>
+                            <Link href="/timelines" className="menu-link">
+                                <span className="menu-icon">
+                                    <i className="bi bi-clock-history"></i>
+                                </span>
+                                <span className="menu-text">Timelines</span>
+                            </Link>
+                        </div>
+
+                        <div className={`menu-item ${isActive('/reports') ? 'active' : ''}`}>
+                            <Link href="/reports" className="menu-link">
+                                <span className="menu-icon">
+                                    <i className="bi bi-file-earmark-text"></i>
+                                </span>
+                                <span className="menu-text">Reports</span>
+                            </Link>
+                        </div>
+
+                        <div className="menu-divider"></div>
+
+                        {/* ================= PLATFORM ================= */}
+                        <div className="menu-header">Platform</div>
+
+                        <div className={`menu-item ${isActive('/organization') ? 'active' : ''}`}>
+                            <Link href="/organization" className="menu-link">
+                                <span className="menu-icon">
+                                    <i className="bi bi-building"></i>
+                                </span>
+                                <span className="menu-text">Organization</span>
+                            </Link>
+                        </div>
+
+                        <div className={`menu-item ${isActive('/users') ? 'active' : ''}`}>
+                            <Link href="/users" className="menu-link">
+                                <span className="menu-icon">
+                                    <i className="bi bi-people"></i>
+                                </span>
+                                <span className="menu-text">Users & Roles</span>
+                            </Link>
+                        </div>
+
+                        <div className={`menu-item ${isActive('/audit') ? 'active' : ''}`}>
+                            <Link href="/audit" className="menu-link">
+                                <span className="menu-icon">
+                                    <i className="bi bi-shield-check"></i>
+                                </span>
+                                <span className="menu-text">Audit Logs</span>
+                            </Link>
+                        </div>
+
+                        <div className={`menu-item ${isActive('/settings') ? 'active' : ''}`}>
+                            <Link href="/settings" className="menu-link">
+                                <span className="menu-icon">
+                                    <i className="bi bi-gear"></i>
+                                </span>
+                                <span className="menu-text">System Settings</span>
+                            </Link>
+                        </div>
+
                     </div>
                 </div>
-
             </div>
-        </div>
+
+            {/* BEGIN mobile sidebar backdrop */}
+            <button
+                className="app-sidebar-mobile-backdrop"
+                data-toggle-target=".app"
+                data-toggle-class="app-sidebar-mobile-toggled"
+            ></button>
+            {/* END mobile sidebar backdrop */}
+        </>
     );
 }
