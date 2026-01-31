@@ -3,6 +3,7 @@
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLogout } from '@/lib/useLogout';
+import { useEffect } from 'react';
 
 export default function AppTopBar() {
     const router = useRouter();
@@ -25,6 +26,38 @@ export default function AppTopBar() {
             modal.removeAttribute('aria-modal');
         }
     }, []);
+
+    useEffect(() => {
+        const togglers = document.querySelectorAll('[data-toggle-class]');
+
+        togglers.forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                const targetSelector = btn.getAttribute('data-toggle-target');
+                const toggleClass = btn.getAttribute('data-toggle-class');
+                const dismissClass = btn.getAttribute('data-dismiss-class');
+
+                if (!targetSelector || !toggleClass) return;
+
+                const target = document.querySelector(targetSelector);
+                if (!target) return;
+
+                if (dismissClass) {
+                    target.classList.remove(dismissClass);
+                }
+
+                target.classList.toggle(toggleClass);
+            });
+        });
+
+        return () => {
+            togglers.forEach((btn) => {
+                btn.replaceWith(btn.cloneNode(true));
+            });
+        };
+    }, []);
+
 
     const handleLogout = useCallback(() => {
         closeLogoutModal();
