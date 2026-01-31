@@ -1,118 +1,167 @@
-/*
- *   Crafted On Fri Jan 30 2026
- *   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
- *   fluctuations, signal interference, or doubt—it can only be
- *   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
- *   
- *   www.devlan.co.ke
- *   hello@devlan.co.ke
- *
- *
- *   The Devlan Solutions LTD Super Duper User License Agreement
- *   Copyright (c) 2022 Devlan Solutions LTD
- *
- *
- *   1. LICENSE TO BE AWESOME
- *   Congrats, you lucky human! Devlan Solutions LTD hereby bestows upon you the magical,
- *   revocable, personal, non-exclusive, and totally non-transferable right to install this epic system
- *   on not one, but TWO separate computers for your personal, non-commercial shenanigans.
- *   Unless, of course, you've leveled up with a commercial license from Devlan Solutions LTD.
- *   Sharing this software with others or letting them even peek at it? Nope, that's a big no-no.
- *   And don't even think about putting this on a network or letting a crowd join the fun unless you
- *   first scored a multi-user license from us. Sharing is caring, but rules are rules!
- *
- *   2. COPYRIGHT POWER-UP
- *   This Software is the prized possession of Devlan Solutions LTD and is shielded by copyright law
- *   and the forces of international copyright treaties. You better not try to hide or mess with
- *   any of our awesome proprietary notices, labels, or marks. Respect the swag!
- *
- *
- *   3. RESTRICTIONS, NO CHEAT CODES ALLOWED
- *   You may not, and you shall not let anyone else:
- *   (a) reverse engineer, decompile, decode, decrypt, disassemble, or do any sneaky stuff to
- *   figure out the source code of this software;
- *   (b) modify, remix, distribute, or create your own funky version of this masterpiece;
- *   (c) copy (except for that one precious backup), distribute, show off in public, transmit, sell, rent,
- *   lease, or otherwise exploit the Software like it's your own.
- *
- *
- *   4. THE ENDGAME
- *   This License lasts until one of us says 'Game Over'. You can call it quits anytime by
- *   destroying the Software and all the copies you made (no hiding them under your bed).
- *   If you break any of these sacred rules, this License self-destructs, and you must obliterate
- *   every copy of the Software, no questions asked.
- *
- *
- *   5. NO GUARANTEES, JUST PIXELS
- *   DEVLAN SOLUTIONS LTD doesn’t guarantee this Software is flawless—it might have a few
- *   quirks, but who doesn’t? DEVLAN SOLUTIONS LTD washes its hands of any other warranties,
- *   implied or otherwise. That means no promises of perfect performance, marketability, or
- *   non-infringement. Some places have different rules, so you might have extra rights, but don’t
- *   count on us for backup if things go sideways. Use at your own risk, brave adventurer!
- *
- *
- *   6. SEVERABILITY—KEEP THE GOOD STUFF
- *   If any part of this License gets tossed out by a judge, don’t worry—the rest of the agreement
- *   still stands like a boss. Just because one piece fails doesn’t mean the whole thing crumbles.
- *
- *
- *   7. NO DAMAGE, NO DRAMA
- *   Under no circumstances will Devlan Solutions LTD or its squad be held responsible for any wild,
- *   indirect, or accidental chaos that might come from using this software—even if we warned you!
- *   And if you ever think you’ve got a claim, the most you’re getting out of us is the license fee you
- *   paid—if any. No drama, no big payouts, just pixels and code.
- *
- */
-import Nav from '@/components/Nav';
-import Footer from '@/components/Footer';
+import Nav from '../../components/Nav';
+import Footer from '../../components/Footer';
 
 export const metadata = {
-    title: 'Use Cases'
+    title: 'Use Cases | DFIR-AI',
 };
 
-export default function UseCases() {
+export default function UseCasesPage() {
     return (
         <>
             <Nav />
+            <div className="py-5 bg-body bg-opacity-50" data-bs-theme="dark">
+                <div className="container-xxl p-3 p-lg-5">
 
-            <main className="pt-16 bg-background text-textPrimary">
-                <section className="container px-4 md:px-8 py-24 max-w-5xl">
-                    <h1 className="text-4xl font-extrabold mb-8">
-                        DFIR Use Cases
-                    </h1>
+                    {/* PAGE HEADER */}
+                    <div className="row justify-content-center mb-5">
+                        <div className="col-xl-10 col-lg-11">
+                            <h1 className="display-6 fw-bold mb-3">
+                                DFIR-AI Use Cases
+                            </h1>
 
-                    <p className="text-lg text-textMuted mb-12">
-                        DFIR-AI is built for real-world security investigations conducted
-                        by enterprise, government, and regulated organizations.
-                    </p>
-
-                    <div className="space-y-8">
-                        <UseCase
-                            title="Incident Response"
-                            desc="Coordinate investigations, track timelines, and preserve evidence integrity."
-                        />
-                        <UseCase
-                            title="Ransomware Analysis"
-                            desc="Trace intrusion paths, identify impact, and support recovery decisions."
-                        />
-                        <UseCase
-                            title="Insider Threat"
-                            desc="Correlate user activity, access patterns, and forensic artifacts."
-                        />
+                            <p className="fs-18px text-body text-opacity-75">
+                                DFIR-AI supports real-world digital forensic and incident
+                                response investigations conducted by security operations
+                                teams, government agencies, and regulated organizations.
+                                Each use case reflects defensible investigative workflows,
+                                not automated black-box decisions.
+                            </p>
+                        </div>
                     </div>
-                </section>
-            </main>
 
+                    {/* PRIMARY USE CASES */}
+                    <div className="row justify-content-center g-4 mb-5">
+                        <div className="col-xl-10 col-lg-11">
+                            <div className="row g-4">
+
+                                <div className="col-lg-4">
+                                    <UseCaseCard
+                                        title="Incident Response Operations"
+                                        description="Manage end-to-end incident response activities from detection and triage through containment, eradication, and recovery while maintaining forensic defensibility."
+                                        points={[
+                                            'Structured case lifecycle management',
+                                            'Analyst-attributed actions and decisions',
+                                            'Immutable audit trails',
+                                            'Evidence-aware task tracking',
+                                        ]}
+                                    />
+                                </div>
+
+                                <div className="col-lg-4">
+                                    <UseCaseCard
+                                        title="Ransomware & Intrusion Analysis"
+                                        description="Reconstruct ransomware intrusions by identifying initial access, privilege escalation, lateral movement, persistence mechanisms, and impact across hosts."
+                                        points={[
+                                            'Kill-chain reconstruction',
+                                            'Multi-host timeline correlation',
+                                            'Artifact-level attribution',
+                                            'Support for legal and executive reporting',
+                                        ]}
+                                    />
+                                </div>
+
+                                <div className="col-lg-4">
+                                    <UseCaseCard
+                                        title="Insider Threat Investigations"
+                                        description="Investigate malicious or negligent insider activity by correlating authentication events, file access, endpoint artifacts, and timeline evidence."
+                                        points={[
+                                            'User-centric activity timelines',
+                                            'Cross-system identity correlation',
+                                            'Forensic-grade access reconstruction',
+                                            'Privacy-aware investigative workflows',
+                                        ]}
+                                    />
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* SECONDARY USE CASES */}
+                    <div className="row justify-content-center g-4">
+                        <div className="col-xl-10 col-lg-11">
+                            <div className="row g-4">
+
+                                <div className="col-lg-6">
+                                    <SimpleUseCase
+                                        title="Compliance & Regulatory Investigations"
+                                        description="Support investigations required by regulatory and legal frameworks such as ISO 27001, PCI DSS, HIPAA, and internal audit mandates with full evidentiary transparency."
+                                    />
+                                </div>
+
+                                <div className="col-lg-6">
+                                    <SimpleUseCase
+                                        title="Threat Hunting & Proactive Analysis"
+                                        description="Conduct hypothesis-driven threat hunting across logs, endpoints, and telemetry sources. AI accelerates pattern discovery while analysts retain full control."
+                                    />
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
             <Footer />
         </>
     );
 }
 
-function UseCase({ title, desc }: { title: string; desc: string }) {
+/* ---------- HUD Cards ---------- */
+
+function UseCaseCard({
+    title,
+    description,
+    points,
+}: {
+    title: string;
+    description: string;
+    points: string[];
+}) {
     return (
-        <div className="bg-card rounded-xl p-6 border border-black/10">
-            <h3 className="font-semibold mb-2">{title}</h3>
-            <p className="text-sm text-textMuted">{desc}</p>
+        <div className="card h-100">
+            <div className="card-body">
+                <h5 className="fw-semibold mb-2">{title}</h5>
+                <p className="text-body text-opacity-75 small">{description}</p>
+                <ul className="small text-body text-opacity-75 mt-3 mb-0">
+                    {points.map((p) => (
+                        <li key={p}>{p}</li>
+                    ))}
+                </ul>
+            </div>
+
+            <div className="card-arrow">
+                <div className="card-arrow-top-left"></div>
+                <div className="card-arrow-top-right"></div>
+                <div className="card-arrow-bottom-left"></div>
+                <div className="card-arrow-bottom-right"></div>
+            </div>
+        </div>
+    );
+}
+
+function SimpleUseCase({
+    title,
+    description,
+}: {
+    title: string;
+    description: string;
+}) {
+    return (
+        <div className="card h-100">
+            <div className="card-body">
+                <h5 className="fw-semibold mb-2">{title}</h5>
+                <p className="text-body text-opacity-75 small mb-0">
+                    {description}
+                </p>
+            </div>
+
+            <div className="card-arrow">
+                <div className="card-arrow-top-left"></div>
+                <div className="card-arrow-top-right"></div>
+                <div className="card-arrow-bottom-left"></div>
+                <div className="card-arrow-bottom-right"></div>
+            </div>
         </div>
     );
 }

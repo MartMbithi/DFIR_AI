@@ -1,130 +1,140 @@
-/*
- *   Crafted On Fri Jan 30 2026
- *   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
- *   fluctuations, signal interference, or doubt—it can only be
- *   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
- *   
- *   www.devlan.co.ke
- *   hello@devlan.co.ke
- *
- *
- *   The Devlan Solutions LTD Super Duper User License Agreement
- *   Copyright (c) 2022 Devlan Solutions LTD
- *
- *
- *   1. LICENSE TO BE AWESOME
- *   Congrats, you lucky human! Devlan Solutions LTD hereby bestows upon you the magical,
- *   revocable, personal, non-exclusive, and totally non-transferable right to install this epic system
- *   on not one, but TWO separate computers for your personal, non-commercial shenanigans.
- *   Unless, of course, you've leveled up with a commercial license from Devlan Solutions LTD.
- *   Sharing this software with others or letting them even peek at it? Nope, that's a big no-no.
- *   And don't even think about putting this on a network or letting a crowd join the fun unless you
- *   first scored a multi-user license from us. Sharing is caring, but rules are rules!
- *
- *   2. COPYRIGHT POWER-UP
- *   This Software is the prized possession of Devlan Solutions LTD and is shielded by copyright law
- *   and the forces of international copyright treaties. You better not try to hide or mess with
- *   any of our awesome proprietary notices, labels, or marks. Respect the swag!
- *
- *
- *   3. RESTRICTIONS, NO CHEAT CODES ALLOWED
- *   You may not, and you shall not let anyone else:
- *   (a) reverse engineer, decompile, decode, decrypt, disassemble, or do any sneaky stuff to
- *   figure out the source code of this software;
- *   (b) modify, remix, distribute, or create your own funky version of this masterpiece;
- *   (c) copy (except for that one precious backup), distribute, show off in public, transmit, sell, rent,
- *   lease, or otherwise exploit the Software like it's your own.
- *
- *
- *   4. THE ENDGAME
- *   This License lasts until one of us says 'Game Over'. You can call it quits anytime by
- *   destroying the Software and all the copies you made (no hiding them under your bed).
- *   If you break any of these sacred rules, this License self-destructs, and you must obliterate
- *   every copy of the Software, no questions asked.
- *
- *
- *   5. NO GUARANTEES, JUST PIXELS
- *   DEVLAN SOLUTIONS LTD doesn’t guarantee this Software is flawless—it might have a few
- *   quirks, but who doesn’t? DEVLAN SOLUTIONS LTD washes its hands of any other warranties,
- *   implied or otherwise. That means no promises of perfect performance, marketability, or
- *   non-infringement. Some places have different rules, so you might have extra rights, but don’t
- *   count on us for backup if things go sideways. Use at your own risk, brave adventurer!
- *
- *
- *   6. SEVERABILITY—KEEP THE GOOD STUFF
- *   If any part of this License gets tossed out by a judge, don’t worry—the rest of the agreement
- *   still stands like a boss. Just because one piece fails doesn’t mean the whole thing crumbles.
- *
- *
- *   7. NO DAMAGE, NO DRAMA
- *   Under no circumstances will Devlan Solutions LTD or its squad be held responsible for any wild,
- *   indirect, or accidental chaos that might come from using this software—even if we warned you!
- *   And if you ever think you’ve got a claim, the most you’re getting out of us is the license fee you
- *   paid—if any. No drama, no big payouts, just pixels and code.
- *
- */
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 
 export const metadata = {
     title: 'Compliance & Trust | DFIR-AI',
     description:
-        'Compliance, security controls, and forensic integrity principles supported by DFIR-AI.'
+        'Compliance, security controls, and forensic integrity principles supported by DFIR-AI.',
 };
 
 export default function Compliance() {
     return (
         <>
+            {/* HUD HEADER */}
             <Nav />
 
-            <main className="pt-16 bg-background text-textPrimary">
-                <section className="container px-4 md:px-8 py-24 max-w-5xl">
-                    <h1 className="text-4xl font-extrabold mb-8">
-                        Compliance & Trust
-                    </h1>
+            {/* BEGIN CONTENT */}
+            <div
+                className="py-5 bg-body bg-opacity-50"
+                data-bs-theme="dark"
+            >
+                <div className="container-xxl p-3 p-lg-5">
 
-                    <p className="text-lg text-textMuted mb-12">
-                        DFIR-AI is designed to support investigations conducted in regulated
-                        environments, with security, auditability, and evidentiary integrity
-                        built into the platform architecture.
-                    </p>
+                    {/* PAGE HEADER */}
+                    <div className="row justify-content-center mb-5">
+                        <div className="col-xl-10 col-lg-11">
+                            <h1 className="display-6 fw-bold mb-3">
+                                Compliance & Trust
+                            </h1>
 
-                    <div className="grid md:grid-cols-2 gap-8">
-
-                        <ComplianceItem
-                            title="ISO/IEC 27001 Alignment"
-                            desc="Information security management principles aligned with ISO/IEC 27001 controls and risk management practices."
-                        />
-
-                        <ComplianceItem
-                            title="SOC 2 Readiness"
-                            desc="Designed to support SOC 2 Trust Service Criteria, including security, availability, and confidentiality."
-                        />
-
-                        <ComplianceItem
-                            title="CJIS-Style Controls"
-                            desc="Role-based access, audit logging, and data handling patterns consistent with CJIS security expectations."
-                        />
-
-                        <ComplianceItem
-                            title="Forensic Chain of Custody"
-                            desc="Evidence handling workflows designed to preserve integrity, traceability, and accountability."
-                        />
-
+                            <p className="fs-18px text-body text-opacity-75">
+                                DFIR-AI is designed to support investigations conducted in
+                                regulated and high-assurance environments. Security controls,
+                                auditability, and evidentiary integrity are built into the
+                                platform architecture rather than added as afterthoughts.
+                            </p>
+                        </div>
                     </div>
-                </section>
-            </main>
 
+                    {/* COMPLIANCE AREAS */}
+                    <div className="row justify-content-center g-4 mb-5">
+                        <div className="col-xl-10 col-lg-11">
+                            <div className="row g-4">
+
+                                <div className="col-lg-6">
+                                    <ComplianceCard
+                                        title="ISO/IEC 27001 Alignment"
+                                        desc="DFIR-AI aligns with information security management principles reflected in ISO/IEC 27001, including risk-based controls, access management, auditability, and secure handling of investigative data."
+                                    />
+                                </div>
+
+                                <div className="col-lg-6">
+                                    <ComplianceCard
+                                        title="SOC 2 Readiness"
+                                        desc="The platform architecture supports SOC 2 Trust Service Criteria, particularly security, availability, and confidentiality, through role-based access controls, logging, and operational transparency."
+                                    />
+                                </div>
+
+                                <div className="col-lg-6">
+                                    <ComplianceCard
+                                        title="CJIS-Style Security Controls"
+                                        desc="DFIR-AI implements access restriction, activity auditing, and evidence handling patterns consistent with CJIS-style security expectations, supporting sensitive law enforcement and government investigations."
+                                    />
+                                </div>
+
+                                <div className="col-lg-6">
+                                    <ComplianceCard
+                                        title="Forensic Chain of Custody"
+                                        desc="Evidence handling workflows are designed to preserve integrity, traceability, and accountability from ingestion through analysis and reporting, supporting court-admissible and regulator-ready investigations."
+                                    />
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* TRUST STATEMENT */}
+                    <div className="row justify-content-center">
+                        <div className="col-xl-10 col-lg-11">
+                            <div className="card">
+                                <div className="card-body">
+                                    <h5 className="fw-semibold mb-2">
+                                        Trust & Transparency Model
+                                    </h5>
+
+                                    <p className="text-body text-opacity-75 small mb-0">
+                                        DFIR-AI is fully self-hosted and open-source. There is no
+                                        vendor telemetry, no external data transmission, and no
+                                        opaque processing logic. Organizations retain full control
+                                        over investigative data, infrastructure, and analytical
+                                        workflows at all times.
+                                    </p>
+                                </div>
+
+                                <div className="card-arrow">
+                                    <div className="card-arrow-top-left"></div>
+                                    <div className="card-arrow-top-right"></div>
+                                    <div className="card-arrow-bottom-left"></div>
+                                    <div className="card-arrow-bottom-right"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            {/* END CONTENT */}
+
+            {/* HUD FOOTER */}
             <Footer />
         </>
     );
 }
 
-function ComplianceItem({ title, desc }: { title: string; desc: string }) {
+/* ================== HUD CARD ================== */
+
+function ComplianceCard({
+    title,
+    desc,
+}: {
+    title: string;
+    desc: string;
+}) {
     return (
-        <div className="bg-card rounded-xl p-6 border border-black/10">
-            <h3 className="font-semibold mb-2">{title}</h3>
-            <p className="text-sm text-textMuted">{desc}</p>
+        <div className="card h-100">
+            <div className="card-body">
+                <h5 className="fw-semibold mb-2">{title}</h5>
+                <p className="text-body text-opacity-75 small mb-0">
+                    {desc}
+                </p>
+            </div>
+
+            <div className="card-arrow">
+                <div className="card-arrow-top-left"></div>
+                <div className="card-arrow-top-right"></div>
+                <div className="card-arrow-bottom-left"></div>
+                <div className="card-arrow-bottom-right"></div>
+            </div>
         </div>
     );
 }

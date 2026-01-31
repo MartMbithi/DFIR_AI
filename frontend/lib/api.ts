@@ -10,7 +10,7 @@ export async function apiFetch(
 
     if (token && isTokenExpired(token)) {
         clearToken();
-        window.location.href = '/auth/login';
+        window.location.href = '/login';
         throw new Error('Session expired');
     }
 

@@ -1,119 +1,222 @@
-/*
- *   Crafted On Fri Jan 30 2026
- *   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
- *   fluctuations, signal interference, or doubt—it can only be
- *   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
- *   
- *   www.devlan.co.ke
- *   hello@devlan.co.ke
- *
- *
- *   The Devlan Solutions LTD Super Duper User License Agreement
- *   Copyright (c) 2022 Devlan Solutions LTD
- *
- *
- *   1. LICENSE TO BE AWESOME
- *   Congrats, you lucky human! Devlan Solutions LTD hereby bestows upon you the magical,
- *   revocable, personal, non-exclusive, and totally non-transferable right to install this epic system
- *   on not one, but TWO separate computers for your personal, non-commercial shenanigans.
- *   Unless, of course, you've leveled up with a commercial license from Devlan Solutions LTD.
- *   Sharing this software with others or letting them even peek at it? Nope, that's a big no-no.
- *   And don't even think about putting this on a network or letting a crowd join the fun unless you
- *   first scored a multi-user license from us. Sharing is caring, but rules are rules!
- *
- *   2. COPYRIGHT POWER-UP
- *   This Software is the prized possession of Devlan Solutions LTD and is shielded by copyright law
- *   and the forces of international copyright treaties. You better not try to hide or mess with
- *   any of our awesome proprietary notices, labels, or marks. Respect the swag!
- *
- *
- *   3. RESTRICTIONS, NO CHEAT CODES ALLOWED
- *   You may not, and you shall not let anyone else:
- *   (a) reverse engineer, decompile, decode, decrypt, disassemble, or do any sneaky stuff to
- *   figure out the source code of this software;
- *   (b) modify, remix, distribute, or create your own funky version of this masterpiece;
- *   (c) copy (except for that one precious backup), distribute, show off in public, transmit, sell, rent,
- *   lease, or otherwise exploit the Software like it's your own.
- *
- *
- *   4. THE ENDGAME
- *   This License lasts until one of us says 'Game Over'. You can call it quits anytime by
- *   destroying the Software and all the copies you made (no hiding them under your bed).
- *   If you break any of these sacred rules, this License self-destructs, and you must obliterate
- *   every copy of the Software, no questions asked.
- *
- *
- *   5. NO GUARANTEES, JUST PIXELS
- *   DEVLAN SOLUTIONS LTD doesn’t guarantee this Software is flawless—it might have a few
- *   quirks, but who doesn’t? DEVLAN SOLUTIONS LTD washes its hands of any other warranties,
- *   implied or otherwise. That means no promises of perfect performance, marketability, or
- *   non-infringement. Some places have different rules, so you might have extra rights, but don’t
- *   count on us for backup if things go sideways. Use at your own risk, brave adventurer!
- *
- *
- *   6. SEVERABILITY—KEEP THE GOOD STUFF
- *   If any part of this License gets tossed out by a judge, don’t worry—the rest of the agreement
- *   still stands like a boss. Just because one piece fails doesn’t mean the whole thing crumbles.
- *
- *
- *   7. NO DAMAGE, NO DRAMA
- *   Under no circumstances will Devlan Solutions LTD or its squad be held responsible for any wild,
- *   indirect, or accidental chaos that might come from using this software—even if we warned you!
- *   And if you ever think you’ve got a claim, the most you’re getting out of us is the license fee you
- *   paid—if any. No drama, no big payouts, just pixels and code.
- *
- */
-import Nav from '@/components/Nav';
-import Footer from '@/components/Footer';
+import Nav from '../../components/Nav';
+import Footer from '../../components/Footer';
 
 export const metadata = {
-    title: 'Platform'
+    title: 'Platform | DFIR-AI',
 };
 
 export default function Platform() {
     return (
         <>
+            {/* ================== NAVIGATION ================== */}
             <Nav />
 
-            <main className="pt-16 bg-background text-textPrimary">
-                <section className="container px-4 md:px-8 py-24 max-w-5xl">
-                    <h1 className="text-4xl font-extrabold mb-8">
-                        DFIR-AI Platform
-                    </h1>
+            {/* ================== PLATFORM OVERVIEW ================== */}
+            <div className="py-5 bg-body bg-opacity-50" data-bs-theme="dark">
+                <div className="container-xxl p-3 p-lg-5">
 
-                    <p className="text-lg text-textMuted mb-12">
-                        DFIR-AI provides an integrated environment for digital forensics
-                        and incident response, combining case management, evidence handling,
-                        and AI-assisted analysis.
-                    </p>
-
-                    <div className="grid md:grid-cols-2 gap-8">
-                        <Feature title="Case Management">
-                            Centralized investigations with immutable audit trails.
-                        </Feature>
-                        <Feature title="Evidence Handling">
-                            Chain-of-custody enforced by design across all artifacts.
-                        </Feature>
-                        <Feature title="AI Analysis">
-                            Automated timelines, correlation, and anomaly detection.
-                        </Feature>
-                        <Feature title="Reporting">
-                            Court-ready, compliance-aligned investigation reports.
-                        </Feature>
+                    {/* HEADER */}
+                    <div className="mb-5">
+                        <h1 className="display-6 fw-600 mb-3">
+                            DFIR-AI Platform Architecture
+                        </h1>
+                        <p className="fs-18px text-body text-opacity-75">
+                            DFIR-AI is a modular, self-hosted Digital Forensics and Incident
+                            Response platform designed to unify investigation workflows,
+                            enforce evidentiary integrity, and accelerate analytical tasks
+                            using AI — without compromising analyst control or data ownership.
+                        </p>
                     </div>
-                </section>
-            </main>
 
+                    <hr className="my-4 opacity-25" />
+
+                    {/* ================== CORE PRINCIPLES ================== */}
+                    <div className="row g-4 mb-5">
+
+                        <div className="col-lg-4">
+                            <h4>Forensic Soundness by Design</h4>
+                            <p>
+                                Every subsystem within DFIR-AI is built to preserve evidentiary
+                                integrity. Artifacts are cryptographically hashed at ingestion,
+                                timestamps are normalized, and all transformations are recorded
+                                to ensure repeatability and admissibility.
+                            </p>
+                        </div>
+
+                        <div className="col-lg-4">
+                            <h4>Analyst-Controlled Intelligence</h4>
+                            <p>
+                                AI within DFIR-AI operates strictly as an analytical assistant.
+                                It performs correlation, summarization, and hypothesis support,
+                                but never replaces analyst judgement or performs autonomous
+                                decision-making.
+                            </p>
+                        </div>
+
+                        <div className="col-lg-4">
+                            <h4>Self-Hosted & Auditable</h4>
+                            <p>
+                                DFIR-AI runs entirely within the organization’s infrastructure.
+                                There is no vendor telemetry, no data exfiltration, and no hidden
+                                dependencies. The platform is open-source and fully auditable.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    {/* ================== PLATFORM MODULES ================== */}
+                    <div className="text-center mb-5">
+                        <h2 className="mb-3">Core Platform Components</h2>
+                        <p className="fs-16px text-body text-opacity-50">
+                            DFIR-AI is composed of tightly integrated modules that support the
+                            complete incident response and forensic investigation lifecycle.
+                        </p>
+                    </div>
+
+                    <div className="row g-4">
+
+                        {/* CASE MANAGEMENT */}
+                        <div className="col-lg-6">
+                            <div className="card h-100">
+                                <div className="card-body p-4">
+                                    <h5>Case Management Engine</h5>
+                                    <p className="text-body text-opacity-75">
+                                        Structured case workflows allow investigators to manage
+                                        incidents from initial detection through closure. Each case
+                                        maintains scoped evidence, analyst notes, tasks, and
+                                        timelines with immutable audit logs.
+                                    </p>
+                                    <ul className="text-body text-opacity-75">
+                                        <li>Case-level access control</li>
+                                        <li>Analyst activity auditing</li>
+                                        <li>Investigation task tracking</li>
+                                        <li>Evidence-to-case binding</li>
+                                    </ul>
+                                </div>
+
+                                <div className="card-arrow">
+                                    <div className="card-arrow-top-left"></div>
+                                    <div className="card-arrow-top-right"></div>
+                                    <div className="card-arrow-bottom-left"></div>
+                                    <div className="card-arrow-bottom-right"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* EVIDENCE VAULT */}
+                        <div className="col-lg-6">
+                            <div className="card h-100">
+                                <div className="card-body p-4">
+                                    <h5>Evidence Vault & Chain of Custody</h5>
+                                    <p className="text-body text-opacity-75">
+                                        The Evidence Vault enforces cryptographic integrity and
+                                        custody tracking across all ingested artifacts, including
+                                        disk images, memory captures, logs, and extracted metadata.
+                                    </p>
+                                    <ul className="text-body text-opacity-75">
+                                        <li>SHA-256 hashing at ingestion</li>
+                                        <li>Custody timeline per artifact</li>
+                                        <li>Immutable evidence records</li>
+                                        <li>Validation on access and export</li>
+                                    </ul>
+                                </div>
+
+                                <div className="card-arrow">
+                                    <div className="card-arrow-top-left"></div>
+                                    <div className="card-arrow-top-right"></div>
+                                    <div className="card-arrow-bottom-left"></div>
+                                    <div className="card-arrow-bottom-right"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* TIMELINE ENGINE */}
+                        <div className="col-lg-6">
+                            <div className="card h-100">
+                                <div className="card-body p-4">
+                                    <h5>Timeline Reconstruction Engine</h5>
+                                    <p className="text-body text-opacity-75">
+                                        DFIR-AI reconstructs unified timelines across heterogeneous
+                                        data sources, correlating file system activity, logs,
+                                        process execution, and network events.
+                                    </p>
+                                    <ul className="text-body text-opacity-75">
+                                        <li>Multi-source timestamp normalization</li>
+                                        <li>Kill-chain aligned views</li>
+                                        <li>Event correlation and clustering</li>
+                                        <li>Analyst-annotated timelines</li>
+                                    </ul>
+                                </div>
+
+                                <div className="card-arrow">
+                                    <div className="card-arrow-top-left"></div>
+                                    <div className="card-arrow-top-right"></div>
+                                    <div className="card-arrow-bottom-left"></div>
+                                    <div className="card-arrow-bottom-right"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* AI ANALYSIS */}
+                        <div className="col-lg-6">
+                            <div className="card h-100">
+                                <div className="card-body p-4">
+                                    <h5>AI-Assisted Analysis Layer</h5>
+                                    <p className="text-body text-opacity-75">
+                                        AI capabilities accelerate investigative tasks such as log
+                                        summarization, artifact correlation, and report drafting,
+                                        while operating entirely under analyst supervision.
+                                    </p>
+                                    <ul className="text-body text-opacity-75">
+                                        <li>User-supplied OpenAI API keys</li>
+                                        <li>No data retention or telemetry</li>
+                                        <li>Explainable analytical outputs</li>
+                                        <li>Analyst validation required</li>
+                                    </ul>
+                                </div>
+
+                                <div className="card-arrow">
+                                    <div className="card-arrow-top-left"></div>
+                                    <div className="card-arrow-top-right"></div>
+                                    <div className="card-arrow-bottom-left"></div>
+                                    <div className="card-arrow-bottom-right"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* REPORTING */}
+                        <div className="col-lg-12">
+                            <div className="card h-100">
+                                <div className="card-body p-4">
+                                    <h5>Reporting & Compliance Outputs</h5>
+                                    <p className="text-body text-opacity-75">
+                                        DFIR-AI generates investigation reports directly from
+                                        validated evidence and timelines. Reports are structured to
+                                        support technical, executive, and legal audiences.
+                                    </p>
+                                    <ul className="text-body text-opacity-75">
+                                        <li>Court-ready evidence references</li>
+                                        <li>Compliance-aligned report templates</li>
+                                        <li>Chain-of-custody inclusion</li>
+                                        <li>Export to PDF and structured formats</li>
+                                    </ul>
+                                </div>
+
+                                <div className="card-arrow">
+                                    <div className="card-arrow-top-left"></div>
+                                    <div className="card-arrow-top-right"></div>
+                                    <div className="card-arrow-bottom-left"></div>
+                                    <div className="card-arrow-bottom-right"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            {/* ================== FOOTER ================== */}
             <Footer />
         </>
-    );
-}
-
-function Feature({ title, children }: { title: string; children: string }) {
-    return (
-        <div className="bg-card rounded-xl p-6 border border-black/10">
-            <h3 className="font-semibold mb-2">{title}</h3>
-            <p className="text-sm text-textMuted">{children}</p>
-        </div>
     );
 }
