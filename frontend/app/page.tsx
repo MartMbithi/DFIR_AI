@@ -56,7 +56,7 @@ export default function Home() {
             {/* RIGHT: VISUAL CONTEXT */}
             <div className="col-lg-6 d-none d-lg-block">
               <img
-                src="/assets/img/landing/mockup-1.jpg"
+                src="/assets/img/landing/app_mockup.png"
                 alt="DFIR-AI Investigation Console"
                 className="w-100 shadow-lg"
               />
