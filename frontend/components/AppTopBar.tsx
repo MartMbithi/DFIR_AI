@@ -114,13 +114,10 @@ export default function AppTopBar() {
                         >
                             <div className="menu-img online">
                                 <img
-                                    src="/assets/img/user/profile.jpg"
+                                    src="/assets/img/profile/no-profile.png"
                                     alt="Profile"
                                     height="60"
                                 />
-                            </div>
-                            <div className="menu-text d-sm-block d-none w-170px">
-                                Analyst
                             </div>
                         </a>
 
