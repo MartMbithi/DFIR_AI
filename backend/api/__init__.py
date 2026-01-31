@@ -67,3 +67,4 @@
 from backend.api.reports import router as reports_router
 from backend.api.artifacts import router as artifacts_router
 from backend.api.jobs_progress import router as jobs_progress_router
+from backend.api.users_me import router as users_me_router

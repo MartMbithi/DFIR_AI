@@ -67,7 +67,7 @@
 from backend.api import jobs_progress
 from backend.api import jobs
 from fastapi import FastAPI
-from backend.api import auth, users, cases, uploads, reports, subscriptions, organizations, artifacts, jobs, case_artifacts
+from backend.api import auth, users, cases, uploads, reports, subscriptions, organizations, artifacts, jobs, case_artifacts, users_me_router
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -76,6 +76,7 @@ from backend.api import (
     reports_router,
     artifacts_router,
     jobs_progress_router,
+    
 )
 
 app = FastAPI()
@@ -101,6 +102,7 @@ app.include_router(uploads.router,
 app.include_router(reports.router)
 app.include_router(subscriptions.router,
                    prefix="/subscriptions", tags=["Subscriptions"])
+app.include_router(users_me_router)
 
 app.include_router(
     organizations.router,
