@@ -62,10 +62,8 @@
  *   And if you ever think you’ve got a claim, the most you’re getting out of us is the license fee you
  *   paid—if any. No drama, no big payouts, just pixels and code.
  *
- */
-import './globals.css'
-import type { Metadata } from 'next';
-import ThemeToggle from '@/components/ThemeToggle';
+ */import type { Metadata } from 'next';
+import './globals.css'; // keep ONLY for resets if needed (no Tailwind)
 
 export const metadata: Metadata = {
   title: {
@@ -108,9 +106,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-background text-textPrimary antialiased">
-        {children}
-        <ThemeToggle />
+      <head>
+        {/* HUD THEME CSS (OFFLINE) */}
+        <link rel="stylesheet" href="/assets/css/vendor.min.css" />
+        <link rel="stylesheet" href="/assets/css/app.min.css" />
+      </head>
+
+      <body>
+        {/* HUD ROOT CONTAINER — REQUIRED */}
+        <div id="app" className="app">
+          {children}
+        </div>
+
+        {/* HUD CORE JS (DEFERRED) */}
+        <script src="/assets/js/vendor.min.js" defer />
+        <script src="/assets/js/app.min.js" defer />
       </body>
     </html>
   );
