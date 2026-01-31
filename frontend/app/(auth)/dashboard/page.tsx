@@ -77,8 +77,99 @@ export default function DashboardPage() {
         return () => clearInterval(interval);
     }, []);
 
+    function BootLine({
+        ts,
+        msg,
+    }: {
+        ts: string;
+        msg: string;
+    }) {
+        return (
+            <div className="d-flex align-items-start mb-1">
+                <span className="me-3 text-body text-opacity-50">
+                    [{ts}]
+                </span>
+                <span>{msg}</span>
+            </div>
+        );
+    }
+
     if (loading) {
-        return <div className="p-4">Loading DFIR environment…</div>;
+        return (
+            <div
+                className="d-flex align-items-center justify-content-center bg-body"
+                style={{ minHeight: '100vh' }}
+            >
+                <div className="card w-700px">
+
+                    <div className="card-body py-5">
+
+                        {/* ================= HEADER ================= */}
+                        <div className="text-center mb-4">
+                            <div
+                                className="d-inline-flex align-items-center justify-content-center rounded-circle border border-theme border-opacity-50 mb-3"
+                                style={{ width: 96, height: 96 }}
+                            >
+                                <i className="bi bi-shield-lock fs-1 text-theme"></i>
+                            </div>
+
+                            <h5 className="fw-semibold mb-1">
+                                DFIR-AI Forensic Engine
+                            </h5>
+
+                            <div className="small text-body text-opacity-50">
+                                Secure initialization sequence
+                            </div>
+                        </div>
+
+                        {/* ================= CONSOLE ================= */}
+                        <div
+                            className="bg-black bg-opacity-75 rounded p-4 small font-monospace text-theme"
+                            style={{ maxHeight: 260, overflow: 'hidden' }}
+                        >
+                            <BootLine ts="00:00:01" msg="Boot sequence initiated" />
+                            <BootLine ts="00:00:02" msg="Validating analyst session" />
+                            <BootLine ts="00:00:03" msg="Loading organization context" />
+                            <BootLine ts="00:00:04" msg="Mounting evidence vault (read-only)" />
+                            <BootLine ts="00:00:05" msg="Indexing forensic artifacts" />
+                            <BootLine ts="00:00:06" msg="Restoring case timelines" />
+                            <BootLine ts="00:00:07" msg="Synchronizing analysis jobs" />
+                            <BootLine ts="00:00:08" msg="Verifying chain-of-custody integrity" />
+                            <BootLine ts="00:00:09" msg="Initializing AI correlation engine" />
+                            <BootLine ts="00:00:10" msg="Finalizing workspace state" />
+                        </div>
+
+                        {/* ================= STATUS ================= */}
+                        <div className="mt-4">
+                            <div className="d-flex justify-content-between small mb-1">
+                                <span className="text-body text-opacity-50">
+                                    System state
+                                </span>
+                                <span className="text-theme">
+                                    OPERATIONAL
+                                </span>
+                            </div>
+
+                            <div className="progress h-5px">
+                                <div
+                                    className="progress-bar bg-theme progress-bar-striped progress-bar-animated"
+                                    style={{ width: '100%' }}
+                                ></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    {/* ================= HUD ARROWS ================= */}
+                    <div className="card-arrow">
+                        <div className="card-arrow-top-left"></div>
+                        <div className="card-arrow-top-right"></div>
+                        <div className="card-arrow-bottom-left"></div>
+                        <div className="card-arrow-bottom-right"></div>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     const runningJobs = jobs.filter(j => j.job_status === 'running').length;

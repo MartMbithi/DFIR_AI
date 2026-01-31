@@ -1,17 +1,43 @@
-/*
- *   Crafted On Fri Jan 30 2026
- *   Devlan Solutions LTD — DFIR-AI
- */
-
 'use client';
 
+import { useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { useLogout } from '@/lib/useLogout';
+
 export default function AppTopBar() {
+    const router = useRouter();
+    const logout = useLogout();
+
+    const openLogoutModal = useCallback(() => {
+        const modal = document.getElementById('logoutModal');
+        if (modal) {
+            modal.classList.add('show');
+            modal.style.display = 'block';
+            modal.setAttribute('aria-modal', 'true');
+        }
+    }, []);
+
+    const closeLogoutModal = useCallback(() => {
+        const modal = document.getElementById('logoutModal');
+        if (modal) {
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+            modal.removeAttribute('aria-modal');
+        }
+    }, []);
+
+    const handleLogout = useCallback(() => {
+        closeLogoutModal();
+        logout();
+        router.replace('/login');
+    }, []);
+
     return (
         <>
-            {/* BEGIN #header */}
+            {/* ================== HUD HEADER (FIXED) ================== */}
             <div id="header" className="app-header">
 
-                {/* Desktop toggler */}
+                {/* Desktop Sidebar Toggle */}
                 <div className="desktop-toggler">
                     <button
                         type="button"
@@ -26,7 +52,7 @@ export default function AppTopBar() {
                     </button>
                 </div>
 
-                {/* Mobile toggler */}
+                {/* Mobile Sidebar Toggle */}
                 <div className="mobile-toggler">
                     <button
                         type="button"
@@ -42,7 +68,7 @@ export default function AppTopBar() {
 
                 {/* Brand */}
                 <div className="brand">
-                    <a href="/app" className="brand-logo">
+                    <a href="/dashboard" className="brand-logo">
                         <span className="brand-img">
                             <span className="brand-img-text text-theme">D</span>
                         </span>
@@ -50,30 +76,16 @@ export default function AppTopBar() {
                     </a>
                 </div>
 
-                {/* Menu */}
+                {/* Right Menu */}
                 <div className="menu">
-
-                    {/* Search */}
-                    <div className="menu-item">
-                        <a
-                            href="#"
-                            className="menu-link"
-                            data-toggle-class="app-header-menu-search-toggled"
-                            data-toggle-target=".app"
-                        >
-                            <div className="menu-icon">
-                                <i className="bi bi-search nav-icon"></i>
-                            </div>
-                        </a>
-                    </div>
 
                     {/* Notifications */}
                     <div className="menu-item dropdown dropdown-mobile-full">
                         <a
                             href="#"
+                            className="menu-link"
                             data-bs-toggle="dropdown"
                             data-bs-display="static"
-                            className="menu-link"
                         >
                             <div className="menu-icon">
                                 <i className="bi bi-bell nav-icon"></i>
@@ -82,22 +94,23 @@ export default function AppTopBar() {
                         </a>
 
                         <div className="dropdown-menu dropdown-menu-end mt-1 w-300px fs-11px">
-                            <h6 className="dropdown-header fs-10px">SYSTEM EVENTS</h6>
+                            <h6 className="dropdown-header fs-10px">
+                                SYSTEM EVENTS
+                            </h6>
                             <div className="dropdown-divider"></div>
-
-                            <div className="px-3 py-2 text-body text-opacity-75 small">
-                                Real-time DFIR activity will appear here
+                            <div className="px-3 py-2 small text-body text-opacity-75">
+                                DFIR system events will appear here.
                             </div>
                         </div>
                     </div>
 
-                    {/* User */}
+                    {/* User Menu */}
                     <div className="menu-item dropdown dropdown-mobile-full">
                         <a
                             href="#"
+                            className="menu-link"
                             data-bs-toggle="dropdown"
                             data-bs-display="static"
-                            className="menu-link"
                         >
                             <div className="menu-img online">
                                 <img
@@ -112,47 +125,71 @@ export default function AppTopBar() {
                         </a>
 
                         <div className="dropdown-menu dropdown-menu-end me-lg-3 fs-11px">
-                            <a className="dropdown-item d-flex align-items-center" href="/profile">
-                                Profile
-                                <i className="bi bi-person-circle ms-auto text-theme fs-16px"></i>
-                            </a>
-
-                            <a className="dropdown-item d-flex align-items-center" href="/settings">
-                                Settings
-                                <i className="bi bi-gear ms-auto text-theme fs-16px"></i>
-                            </a>
+                            <button
+                                className="dropdown-item d-flex align-items-center"
+                                onClick={openLogoutModal}
+                            >
+                                Logout
+                                <i className="bi bi-box-arrow-right ms-auto text-theme fs-16px"></i>
+                            </button>
                         </div>
                     </div>
 
                 </div>
-
-                {/* Search Overlay */}
-                <form className="menu-search">
-                    <div className="menu-search-container">
-                        <div className="menu-search-icon">
-                            <i className="bi bi-search"></i>
-                        </div>
-                        <div className="menu-search-input">
-                            <input
-                                type="text"
-                                className="form-control form-control-lg"
-                                placeholder="Search DFIR-AI…"
-                            />
-                        </div>
-                        <div className="menu-search-icon">
-                            <a
-                                href="#"
-                                data-toggle-class="app-header-menu-search-toggled"
-                                data-toggle-target=".app"
-                            >
-                                <i className="bi bi-x-lg"></i>
-                            </a>
-                        </div>
-                    </div>
-                </form>
-
             </div>
-            {/* END #header */}
+            {/* ================== END HEADER ================== */}
+
+            {/* ================== LOGOUT MODAL ================== */}
+            <div className="modal fade" id="logoutModal" tabIndex={-1}>
+                <div className="modal-dialog modal-dialog-centered">
+                    <div className="modal-content">
+
+                        <div className="modal-header">
+                            <h5 className="modal-title">
+                                End Session
+                            </h5>
+                            <button
+                                type="button"
+                                className="btn-close"
+                                onClick={closeLogoutModal}
+                            ></button>
+                        </div>
+
+                        <div className="modal-body">
+                            <p className="text-body text-opacity-75 mb-0">
+                                You are about to terminate your authenticated DFIR-AI session.
+                                Active background jobs will continue to run, but you will need
+                                to re-authenticate to view results.
+                            </p>
+                        </div>
+
+                        <div className="modal-footer">
+                            <button
+                                className="btn btn-outline-secondary"
+                                onClick={closeLogoutModal}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="btn btn-outline-theme"
+                                onClick={handleLogout}
+                            >
+                                Logout
+                            </button>
+                        </div>
+
+                        {/* HUD Card Arrows */}
+                        <div className="card-arrow">
+                            <div className="card-arrow-top-left"></div>
+                            <div className="card-arrow-top-right"></div>
+                            <div className="card-arrow-bottom-left"></div>
+                            <div className="card-arrow-bottom-right"></div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            {/* ================== END MODAL ================== */}
         </>
     );
 }
