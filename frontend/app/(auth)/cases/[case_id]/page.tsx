@@ -17,7 +17,6 @@ type Case = {
 type Upload = {
     upload_id: string;
     upload_filename: string;
-    upload_mime_type?: string;
     upload_size: number;
     uploaded_at: string;
 };
@@ -26,9 +25,22 @@ type Job = {
     job_id: string;
     job_status: string;
     created_at: string;
+    job_progress?: string;
+    job_stage?: string;
+    reports?: Report[];
 };
 
+type Report = {
+    report_id: string;
+    report_type: string;
+    report_generated_at: string;
+    download_url: string;
+};
+
+/* ================= CONFIG ================= */
+
 const PAGE_SIZE = 6;
+const POLL_INTERVAL = 4000;
 
 /* ================= PAGE ================= */
 
@@ -43,27 +55,75 @@ export default function CaseDetailPage() {
     const [page, setPage] = useState(1);
     const [selected, setSelected] = useState<Set<string>>(new Set());
 
-    /* Modal */
+    /* Upload modal */
     const [uploadOpen, setUploadOpen] = useState(false);
     const [files, setFiles] = useState<File[]>([]);
     const [uploading, setUploading] = useState(false);
 
     /* ================= LOAD ================= */
 
-    async function load() {
+    async function loadBase() {
         const c = await apiFetch(`/cases/${case_id}`);
-        setCaseData(c);
-
         const u = await apiFetch(`/cases/${case_id}/uploads`);
-        setUploads(u);
-
         const j = await apiFetch(`/jobs?case_id=${case_id}`);
-        setJobs(j);
+        const r = await apiFetch(`/reports/case/${case_id}`);
+
+        // Attach reports to jobs (time-based association for now)
+        const enrichedJobs = j.map((job: Job) => ({
+            ...job,
+            reports: r.filter((rep: Report) =>
+                new Date(rep.report_generated_at) >= new Date(job.created_at)
+            )
+        }));
+
+        setCaseData(c);
+        setUploads(u);
+        setJobs(enrichedJobs);
     }
 
     useEffect(() => {
-        load();
+        loadBase();
     }, []);
+
+    /* ================= JOB POLLING ================= */
+
+    useEffect(() => {
+        const hasRunning = jobs.some(j =>
+            j.job_status === 'queued' || j.job_status === 'running'
+        );
+
+        if (!hasRunning) return;
+
+        const interval = setInterval(async () => {
+            try {
+                const refreshed = await apiFetch(`/jobs?case_id=${case_id}`);
+
+                const enriched = await Promise.all(
+                    refreshed.map(async (job: Job) => {
+                        try {
+                            const progress = await apiFetch(`/jobs/${job.job_id}/progress`);
+                            const stage = await apiFetch(`/jobs/${job.job_id}/stages`);
+                            return {
+                                ...job,
+                                job_progress: progress?.progress,
+                                job_stage: stage?.current_stage
+                            };
+                        } catch {
+                            return job;
+                        }
+                    })
+                );
+
+                setJobs(prev =>
+                    prev.map(j => enriched.find(e => e.job_id === j.job_id) || j)
+                );
+            } catch {
+                // polling must never break UI
+            }
+        }, POLL_INTERVAL);
+
+        return () => clearInterval(interval);
+    }, [jobs, case_id]);
 
     /* ================= FILTER + PAGINATION ================= */
 
@@ -74,7 +134,6 @@ export default function CaseDetailPage() {
         );
     }, [uploads, search]);
 
-    const totalPages = Math.ceil(filteredUploads.length / PAGE_SIZE);
     const pageUploads = filteredUploads.slice(
         (page - 1) * PAGE_SIZE,
         page * PAGE_SIZE
@@ -109,7 +168,7 @@ export default function CaseDetailPage() {
 
             setFiles([]);
             setUploadOpen(false);
-            await load();
+            await loadBase();
         } finally {
             setUploading(false);
         }
@@ -130,7 +189,7 @@ export default function CaseDetailPage() {
         });
 
         setSelected(new Set());
-        load();
+        loadBase();
     }
 
     /* ================= DELETE UPLOAD ================= */
@@ -138,7 +197,7 @@ export default function CaseDetailPage() {
     async function deleteUpload(id: string) {
         if (!confirm('Delete this upload?')) return;
         await apiFetch(`/cases/uploads/${id}`, { method: 'DELETE' });
-        load();
+        loadBase();
     }
 
     if (!caseData) return <div className="p-8">Loading…</div>;
@@ -157,13 +216,11 @@ export default function CaseDetailPage() {
                     </p>
                 </section>
 
-                {/* GRID */}
+                {/* MAIN GRID */}
                 <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
                     {/* UPLOADS */}
                     <div className="lg:col-span-8 space-y-4">
-
-                        {/* TOOLBAR */}
                         <div className="flex items-center justify-between">
                             <input
                                 placeholder="Search uploads…"
@@ -179,7 +236,6 @@ export default function CaseDetailPage() {
                                 >
                                     Upload
                                 </button>
-
                                 <button
                                     onClick={queueJob}
                                     disabled={selected.size === 0}
@@ -190,7 +246,6 @@ export default function CaseDetailPage() {
                             </div>
                         </div>
 
-                        {/* TABLE */}
                         <div className="border rounded bg-card overflow-hidden">
                             <table className="w-full text-sm">
                                 <thead className="border-b bg-background">
@@ -240,30 +295,65 @@ export default function CaseDetailPage() {
                                 </tbody>
                             </table>
                         </div>
-
                     </div>
 
-                    {/* JOB ACTIVITY */}
+                    {/* JOB ACTIVITY + REPORTS */}
                     <div className="lg:col-span-4 border rounded bg-card p-4 space-y-4">
                         <h2 className="font-semibold">Job Activity</h2>
 
                         {jobs.length === 0 && (
-                            <p className="text-sm text-textMuted">
-                                No jobs queued yet.
-                            </p>
+                            <p className="text-sm text-textMuted">No jobs queued yet.</p>
                         )}
 
                         {jobs.map(j => (
-                            <div key={j.job_id} className="border rounded p-3 text-sm">
+                            <div key={j.job_id} className="border rounded p-3 space-y-2 text-sm">
                                 <p className="font-mono text-xs break-all">{j.job_id}</p>
-                                <p className="text-xs text-textMuted">Status: {j.job_status}</p>
-                                <p className="text-xs text-textMuted">
-                                    {new Date(j.created_at).toLocaleString()}
+
+                                <p className="text-xs">
+                                    Status:{' '}
+                                    <span className={
+                                        j.job_status === 'completed'
+                                            ? 'text-green-600'
+                                            : j.job_status === 'failed'
+                                                ? 'text-red-600'
+                                                : 'text-yellow-600'
+                                    }>
+                                        {j.job_status}
+                                    </span>
                                 </p>
+
+                                {j.job_stage && (
+                                    <p className="text-xs text-textMuted">
+                                        Stage: {j.job_stage}
+                                    </p>
+                                )}
+
+                                {j.job_progress && (
+                                    <div className="w-full h-2 bg-background rounded">
+                                        <div
+                                            className="h-2 bg-primary rounded"
+                                            style={{ width: j.job_progress }}
+                                        />
+                                    </div>
+                                )}
+
+                                {j.reports && j.reports.length > 0 && (
+                                    <div className="pt-2 space-y-1">
+                                        {j.reports.map(r => (
+                                            <a
+                                                key={r.report_id}
+                                                href={`${process.env.NEXT_PUBLIC_API_BASE_URL}${r.download_url}`}
+                                                target="_blank"
+                                                className="block text-xs text-primary hover:underline"
+                                            >
+                                                Download Report
+                                            </a>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
-
                 </section>
             </main>
 
