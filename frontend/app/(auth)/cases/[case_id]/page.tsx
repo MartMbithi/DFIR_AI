@@ -174,7 +174,36 @@ export default function CaseDetailPage() {
         }
     }
 
-    /* ================= JOB QUEUE ================= */
+    /* Secure Download */
+    async function downloadReport(reportId: string) {
+        const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/${reportId}/download`,
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            }
+        );
+
+        if (!res.ok) {
+            alert('Failed to download report');
+            return;
+        }
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `report-${reportId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+    }
+
+
+    /*  JOB QUEUE */
 
     async function queueJob() {
         if (selected.size === 0) return;
@@ -337,20 +366,29 @@ export default function CaseDetailPage() {
                                     </div>
                                 )}
 
-                                {j.reports && j.reports.length > 0 && (
-                                    <div className="pt-2 space-y-1">
-                                        {j.reports.map(r => (
-                                            <a
-                                                key={r.report_id}
-                                                href={`${process.env.NEXT_PUBLIC_API_BASE_URL}${r.download_url}`}
-                                                target="_blank"
-                                                className="block text-xs text-primary hover:underline"
+                                {j.reports && j.reports.length > 0 && (() => {
+                                    const latestReport = [...j.reports].sort(
+                                        (a, b) =>
+                                            new Date(b.report_generated_at).getTime() -
+                                            new Date(a.report_generated_at).getTime()
+                                    )[0];
+
+                                    return (
+                                        <div className="pt-2 space-y-1">
+                                            <p className="text-xs text-textMuted">
+                                                Latest Report ({latestReport.report_type})
+                                            </p>
+
+                                            <button
+                                                onClick={() => downloadReport(latestReport.report_id)}
+                                                className="text-primary hover:underline text-xs font-medium"
                                             >
-                                                Download Report
-                                            </a>
-                                        ))}
-                                    </div>
-                                )}
+                                                Download
+                                            </button>
+                                        </div>
+                                    );
+                                })()}
+
                             </div>
                         ))}
                     </div>
