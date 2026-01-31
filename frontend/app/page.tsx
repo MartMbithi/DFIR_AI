@@ -1,5 +1,5 @@
 /*
- *   Crafted On Fri Jan 30 2026
+ *   Crafted On Sat Jan 31 2026
  *   From his finger tips, through his IDE to your deployment environment at full throttle with no bugs, loss of data,
  *   fluctuations, signal interference, or doubt—it can only be
  *   the legendary coding wizard, Martin Mbithi (martin@devlan.co.ke, www.martmbithi.github.io)
@@ -63,131 +63,187 @@
  *   paid—if any. No drama, no big payouts, just pixels and code.
  *
  */
+
 'use client';
 
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import Nav from '@/components/Nav';
-import Footer from '@/components/Footer';
+import Nav from '../components/Nav';
+import Footer from '../components/Footer';
 
 export default function Home() {
   return (
     <>
+      {/* ================== NAVIGATION ================== */}
       <Nav />
 
-      <main className="pt-16 bg-background text-textPrimary">
+      {/* ================== BEGIN #home ================== */}
+      <div
+        id="home"
+        className="py-5 position-relative bg-body bg-opacity-50"
+        data-bs-theme="dark"
+      >
+        <div className="container-xxl p-3 p-lg-5">
+          <div className="row align-items-center">
 
-        <section className="min-h-screen flex items-center bg-gradient-to-br from-background to-card">
-          <div className="container px-4 md:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+            {/* LEFT: CORE STATEMENT */}
+            <div className="col-lg-6">
+              <h1 className="display-6 fw-600 mb-3 mt-4">
+                Digital Forensics &<br />
+                Incident Response<br />
+                <span className="text-theme">Powered by AI</span>
+              </h1>
 
-              {/* TEXT */}
-              <motion.div
-                className="md:col-span-6"
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: 'easeOut' }}
-              >
-                <h1 className="text-[36px] md:text-[64px] leading-tight font-extrabold">
-                  Digital Forensics &
-                  <br />
-                  Incident Response
-                  <br />
-                  <span className="text-primary">Powered by AI</span>
-                </h1>
+              <p className="fs-18px text-body text-opacity-75 mb-4">
+                DFIR-AI is a self-hosted, open-source Digital Forensics and Incident
+                Response platform built to support security analysts, incident
+                responders, and investigators conducting evidence-driven
+                investigations in enterprise and regulated environments.
+              </p>
 
-                <p className="mt-6 text-base md:text-lg max-w-xl text-textMuted">
-                  Investigate security incidents faster while maintaining
-                  forensic integrity, evidentiary standards, and regulatory
-                  compliance across enterprise environments.
-                </p>
+              <p className="text-body text-opacity-75">
+                The platform augments established DFIR methodologies with
+                AI-assisted correlation, timeline reconstruction, and report
+                generation while preserving forensic integrity, analyst control,
+                and evidentiary admissibility. DFIR-AI does not transmit data
+                externally and operates entirely within the user’s infrastructure,
+                requiring only user-supplied OpenAI API keys.
+              </p>
 
-                <div className="mt-10 flex flex-col sm:flex-row gap-4">
-                  <Link
-                    href="/use-cases"
-                    className="px-8 py-4 bg-primary rounded-lg font-semibold text-textInverse hover:bg-primaryHover transition"
-                  >
-                    View Use Cases
-                  </Link>
+              <div className="mt-4 mb-4">
+                <a href="/docs" className="btn btn-lg btn-outline-theme me-2">
+                  Documentation <i className="fa fa-arrow-right ms-2 opacity-5"></i>
+                </a>
 
-                  <Link
-                    href="/platform"
-                    className="px-8 py-4 border border-primary rounded-lg font-semibold text-primary hover:bg-primary hover:text-textInverse transition"
-                  >
-                    Explore Platform
-                  </Link>
-                </div>
-              </motion.div>
-
-              {/* REAL UI MOCK */}
-              <div className="hidden md:block md:col-span-6">
-                <div className="bg-card rounded-2xl border border-black/10 shadow-lg overflow-hidden">
-
-                  {/* Header */}
-                  <div className="flex items-center justify-between px-6 py-4 border-b border-black/10 text-xs uppercase text-textMuted">
-                    <span>DFIR-AI Console</span>
-                    <span className="text-primary">Live Investigation</span>
-                  </div>
-
-                  {/* Body */}
-                  <div className="p-6 grid grid-cols-12 gap-4">
-
-                    {/* Case Panel */}
-                    <div className="col-span-5 bg-background rounded-lg p-4">
-                      <p className="text-xs uppercase font-semibold text-primary mb-2">
-                        Active Case
-                      </p>
-                      <p className="text-sm font-semibold">IR-2026-014</p>
-                      <p className="text-xs text-textMuted mt-2">
-                        Ransomware intrusion with lateral movement detected.
-                      </p>
-
-                      <div className="mt-4 space-y-2 text-xs">
-                        <Status label="Initial Access" color="bg-alert" />
-                        <Status label="Privilege Escalation" color="bg-alert" />
-                        <Status label="Containment" color="bg-success" />
-                      </div>
-                    </div>
-
-                    {/* Evidence Chart */}
-                    <div className="col-span-7 bg-background rounded-lg p-4">
-                      <p className="text-xs uppercase font-semibold text-primary mb-2">
-                        Evidence Correlation
-                      </p>
-
-                      <svg viewBox="0 0 200 90" className="w-full h-24">
-                        <rect x="10" y="40" width="16" height="40" className="fill-primary" />
-                        <rect x="40" y="20" width="16" height="60" className="fill-success" />
-                        <rect x="70" y="55" width="16" height="25" className="fill-primary" />
-                        <rect x="100" y="10" width="16" height="70" className="fill-alert" />
-                        <rect x="130" y="30" width="16" height="50" className="fill-primary" />
-                      </svg>
-
-                      <p className="mt-3 text-xs text-textMuted">
-                        AI-driven linkage across endpoints, logs, and artifacts.
-                      </p>
-                    </div>
-
-                  </div>
-                </div>
+                <a href="/self-hosted" className="btn btn-lg btn-outline-white">
+                  Self-Hosted Deployment
+                </a>
               </div>
 
+             
+            </div>
+
+            {/* RIGHT: VISUAL CONTEXT */}
+            <div className="col-lg-6 d-none d-lg-block">
+              <img
+                src="/assets/img/landing/mockup-1.jpg"
+                alt="DFIR-AI Investigation Console"
+                className="w-100 shadow-lg"
+              />
+            </div>
+
+          </div>
+        </div>
+      </div>
+      {/* ================== END #home ================== */}
+
+      {/* ================== BEGIN #about ================== */}
+      <div id="about" className="py-5 bg-component">
+        <div className="container-xxl p-3 p-lg-5">
+
+          <div className="text-center mb-5">
+            <h1 className="mb-3">Purpose & Design Philosophy</h1>
+            <p className="fs-16px text-body text-opacity-50">
+              DFIR-AI was designed to address limitations in modern incident
+              response tooling: fragmented workflows, excessive manual effort,
+              and opaque vendor-controlled platforms.
+            </p>
+          </div>
+
+          <div className="row g-4">
+            <div className="col-lg-4">
+              <h4>Forensic Soundness</h4>
+              <p>
+                Every artifact processed by DFIR-AI is cryptographically hashed,
+                time-aligned, and traceable throughout its lifecycle. The system
+                enforces handling practices consistent with court-admissible and
+                regulator-ready investigations.
+              </p>
+            </div>
+
+            <div className="col-lg-4">
+              <h4>Analyst-Centric AI</h4>
+              <p>
+                AI within DFIR-AI operates strictly as an analytical assistant.
+                It accelerates correlation, summarization, and hypothesis
+                generation while leaving interpretation and final judgement
+                entirely to the investigator.
+              </p>
+            </div>
+
+            <div className="col-lg-4">
+              <h4>Open & Self-Hosted</h4>
+              <p>
+                DFIR-AI is fully self-hosted and open-source. There is no telemetry,
+                no data exfiltration, and no vendor lock-in. Organizations retain
+                full visibility and control over their investigative workflows.
+              </p>
             </div>
           </div>
-        </section>
 
-      </main>
+        </div>
+      </div>
+      {/* ================== END #about ================== */}
 
+      {/* ================== BEGIN #features ================== */}
+      <div id="features" className="py-5">
+        <div className="container-xxl p-3 p-lg-5">
+
+          <div className="text-center mb-5">
+            <h1 className="mb-3">Core Capabilities</h1>
+            <p className="fs-16px text-body text-opacity-50">
+              DFIR-AI provides an integrated environment supporting the full
+              digital investigation lifecycle.
+            </p>
+          </div>
+
+          <div className="row g-4">
+
+            <div className="col-lg-3">
+              <div className="card p-4 h-100">
+                <h5>Case Management</h5>
+                <p>
+                  Structured case workflows with analyst notes, task tracking,
+                  evidence references, and immutable audit logs.
+                </p>
+              </div>
+            </div>
+
+            <div className="col-lg-3">
+              <div className="card p-4 h-100">
+                <h5>Timeline Reconstruction</h5>
+                <p>
+                  Multi-source forensic timelines across endpoints, logs,
+                  memory artifacts, and network activity.
+                </p>
+              </div>
+            </div>
+
+            <div className="col-lg-3">
+              <div className="card p-4 h-100">
+                <h5>Evidence Vault</h5>
+                <p>
+                  Centralized evidence storage with cryptographic integrity
+                  verification and chain-of-custody tracking.
+                </p>
+              </div>
+            </div>
+
+            <div className="col-lg-3">
+              <div className="card p-4 h-100">
+                <h5>Automated Reporting</h5>
+                <p>
+                  Generation of technical, executive, and legal-ready reports
+                  directly from validated investigation data.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      {/* ================== END #features ================== */}
+
+      {/* ================== FOOTER ================== */}
       <Footer />
     </>
-  );
-}
-
-function Status({ label, color }: { label: string; color: string }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className={`w-2 h-2 rounded-full ${color}`} />
-      <span>{label}</span>
-    </div>
   );
 }

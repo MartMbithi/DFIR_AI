@@ -62,75 +62,88 @@
  *   And if you ever think you’ve got a claim, the most you’re getting out of us is the license fee you
  *   paid—if any. No drama, no big payouts, just pixels and code.
  *
- */
-import Link from 'next/link';
+ */import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-card border-t border-black/10">
-      <div
-        className="
-          container
-          py-16
-          grid grid-cols-1 md:grid-cols-4 gap-10
-          text-sm
-          text-textPrimary
-        "
-      >
-        {/* Column 1 */}
-        <div>
-          <h4 className="font-extrabold mb-4">DFIR-AI</h4>
-          <p className="text-textMuted">
-            Enterprise Digital Forensics & Incident Response platform built
-            for regulated environments.
-          </p>
-        </div>
+    <div
+      id="footer"
+      className="py-5 bg-gray-900 bg-opacity-75 text-body text-opacity-75"
+      data-bs-theme="dark"
+    >
+      <div className="container-xxl px-3 px-lg-5">
+        <div className="row gx-lg-5 gy-4">
 
-        {/* Column 2 */}
-        <div>
-          <h5 className="font-semibold mb-3">Platform</h5>
-          <div className="text-textMuted leading-6 flex flex-col gap-1">
-            <Link href="/platform" className="hover:text-primary">
-              Platform
-            </Link>
-            <Link href="/use-cases" className="hover:text-primary">
-              Use Cases
-            </Link>
-            <Link href="/research" className="hover:text-primary">
-              Research
-            </Link>
+          {/* Column 1 */}
+          <div className="col-lg-4">
+            <h5 className="mb-3">DFIR-AI</h5>
+            <p>
+              An open-source Digital Forensics and Incident Response platform
+              designed for self-hosted deployments, forensic integrity, and
+              analyst-driven investigations.
+            </p>
           </div>
-        </div>
 
-        {/* Column 3 */}
-        <div>
-          <h5 className="font-semibold mb-3">Legal</h5>
-          <div className="text-textMuted leading-6 flex flex-col gap-1">
-            <Link href="/legal/privacy" className="hover:text-primary">
-              Privacy Policy
-            </Link>
-            <Link href="/legal/terms" className="hover:text-primary">
-              Terms of Service
-            </Link>
+          {/* Column 2 */}
+          <div className="col-lg-3">
+            <h5 className="mb-3">Platform</h5>
+            <ul className="list-unstyled">
+              <li className="mb-2">
+                <Link href="/docs" className="text-decoration-none text-body text-opacity-75">
+                  Documentation
+                </Link>
+              </li>
+              <li className="mb-2">
+                <Link href="/platform" className="text-decoration-none text-body text-opacity-75">
+                  Architecture
+                </Link>
+              </li>
+              <li className="mb-2">
+                <Link href="/use-cases" className="text-decoration-none text-body text-opacity-75">
+                  Use Cases
+                </Link>
+              </li>
+            </ul>
           </div>
-        </div>
 
-        {/* Column 4 */}
-        <div>
-          <h5 className="font-semibold mb-3">Developed By</h5>
-          <p className="text-textMuted leading-6">
-            Devlan Solutions LTD<br />
+          {/* Column 3 */}
+          <div className="col-lg-3">
+            <h5 className="mb-3">Legal</h5>
+            <ul className="list-unstyled">
+              <li className="mb-2">
+                <Link href="/legal/privacy" className="text-decoration-none text-body text-opacity-75">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li className="mb-2">
+                <Link href="/legal/terms" className="text-decoration-none text-body text-opacity-75">
+                  License & Terms
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 4 */}
+          <div className="col-lg-2">
+            <h5 className="mb-3">Developed By</h5>
+            <p className="mb-1">Devlan Solutions LTD</p>
             <a
               href="https://devlan.co.ke"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline"
+              className="text-decoration-none text-theme"
             >
               devlan.co.ke
             </a>
-          </p>
+          </div>
+        </div>
+
+        <hr className="opacity-4 my-4" />
+
+        <div className="text-center small">
+          © 2026 DFIR-AI — Open-Source DFIR Platform
         </div>
       </div>
-    </footer>
+    </div>
   );
 }

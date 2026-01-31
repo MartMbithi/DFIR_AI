@@ -62,7 +62,9 @@
  *   And if you ever think you’ve got a claim, the most you’re getting out of us is the license fee you
  *   paid—if any. No drama, no big payouts, just pixels and code.
  *
- */import type { Metadata } from 'next';
+ */
+import Script from 'next/script';
+import type { Metadata } from 'next';
 import './globals.css'; // keep ONLY for resets if needed (no Tailwind)
 
 export const metadata: Metadata = {
@@ -119,8 +121,14 @@ export default function RootLayout({
         </div>
 
         {/* HUD CORE JS (DEFERRED) */}
-        <script src="/assets/js/vendor.min.js" defer />
-        <script src="/assets/js/app.min.js" defer />
+        <Script
+          src="/assets/js/vendor.min.js"
+          strategy="afterInteractive"
+        />
+        <Script
+          src="/assets/js/app.min.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
